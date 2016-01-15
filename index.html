@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Star Wars Shooter</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
+</head>
+<body>
+
+    <a href="#welcomeModal" id="welcomeLink"></a>
+    <a href="#levelCompleteModal" id="levelCompleteLink"></a>
+
+    <div id="welcomeModal" class="modalDialog Welcome">
+        <div>
+            <a href="#close" id="closeWelcomeLink"></a>
+            <h2>WELCOME TO REBEL WARS</h2>
+            <table>
+                    <tr>
+                        <td>Username?</td>
+                        <td><input type="text" id="welcomeUserName"/></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="button" id="buttonReady" value="Ready"
+                                 onclick="javascript:UserIsReady()"/>
+                        </td>
+                    </tr>
+            </table>
+            <div style="width:100%;">
+                <img src="images\RebelAlliance.png" height="100" width="100" class="centered" />
+            </div>
+            <div id="highScoreDiv">
+            </div>
+        </div>
+    </div>
+
+    <div id="levelCompleteModal" class="modalDialog LevelComplete">
+        <div>
+            <a href="#close" title="Close" class="close" id="closeLevelCompleteLink"></a>
+            <h2>LEVEL COMPLETE</h2>
+            <table>
+                    <tr>
+                        <td>User:</td>
+                        <td><label id="lvlCompleteUserName"/></td>
+                    </tr>
+                    <tr>
+                        <td>Level:</td>
+                        <td><label id="lvlCompleteLevel"/></td>
+                    </tr>
+                    <tr>
+                        <td>Score:</td>
+                        <td><label id="lvlCompleteScore"/></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="button" id="buttonContinue" value="Continue"
+                                 onclick="javascript:UserContinue()"/>
+                        </td>
+                    </tr>
+            </table>
+            <div style="width:100%;">
+                <img src="images\RebelAlliance.png" height="100" width="100" class="centered" />
+            </div>
+        </div>
+    </div>
+
+    <script src="Main.js"></script>
+
+</body>
+</html>
