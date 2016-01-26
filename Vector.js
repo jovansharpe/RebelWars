@@ -71,6 +71,10 @@ var Vector;
         var c = Math.pow(diffX, 2) + Math.pow(diffY, 2);
         // Solve quadratic
         var ts = solveQuadratic(a, b, c);
+        //check if null
+        if (ts == null) {
+            ts = new Waypoint(targetX, targetY);
+        }
         // Find smallest positive solution
         var t0 = ts.targetX;
         var t1 = ts.targetY;

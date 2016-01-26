@@ -19,12 +19,23 @@ var Render;
         }
         return isHit;
     }
+    /**
+     * Retrieve the amount of damage done to rebel ship by enemy projectiles.
+     * Also handles adding hit animation for any hits.
+     */
     function GetEnemyProjectileDamage(list, rebelShip) {
         var damage = 0;
+        //loop through enemy ships & check projectiles
+        //for collision
         list.forEach(function (enemyShip) {
             damage += doesListContainCollision(rebelShip.getLocationX(), rebelShip.getMaximumX(), rebelShip.getLocationY(), rebelShip.getMaximumY(), GameLogic.getProjectilesByStatus(enemyShip.cannonShotList, true));
             damage += doesListContainCollision(rebelShip.getLocationX(), rebelShip.getMaximumX(), rebelShip.getLocationY(), rebelShip.getMaximumY(), GameLogic.getProjectilesByStatus(enemyShip.missileList, true));
         });
+        //check if damage found
+        if (damage > 0) {
+            //add hit animation
+            GameLogic.addHitAnimation(rebelShip, explosionList, browserWidth, browserHeight);
+        }
         return damage;
     }
     Render.GetEnemyProjectileDamage = GetEnemyProjectileDamage;
@@ -196,8 +207,8 @@ var Render;
                     canvasContext.drawImage(enemyShipList[i].objImage, enemyShipList[i].getLocationX(), enemyShipList[i].getLocationY());
                     //check for collision
                     if (hasBeenHit(enemyShipList[i], cannonShotList, missileList)) {
-                        //add contact animation
-                        GameLogic.addNewExplosion(explosionList, enemyShipList[i].getExplosionX(), enemyShipList[i].getExplosionY(), Constants.SpriteType.EXPLOSION_SMALL, browserWidth, browserHeight);
+                        //add hit animation
+                        GameLogic.addHitAnimation(enemyShipList[i], explosionList, browserWidth, browserHeight);
                         //check if no health left
                         if (enemyShipList[i].health < 1) {
                             //update score

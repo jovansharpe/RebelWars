@@ -319,11 +319,57 @@ module GameLogic {
         });
     }
     
-    export function addNewExplosion(list:Array<GameObjects.SpriteSheetObject>, x:number, y:number,
+    /**
+     * Create appropriate animation based on ship type and health remaining
+     */
+    export function addHitAnimation(ship:GameObjects.ShipObject, list:Array<GameObjects.SpriteSheetObject>, 
+        browserWidth:number, browserHeight:number) : void
+    {
+        var isDestroyed:boolean = ship.health > 0 ? false : true;
+        var x:number = ship.getExplosionX();
+        var y:number = ship.getExplosionY();
+        var type:Constants.SpriteType;
+        
+        //check if destroyed
+        if(isDestroyed)
+        {
+            switch(ship.type)
+            {
+                case Constants.ShipType.EMPIRE_DESTROYER:
+                case Constants.ShipType.EMPIRE_COMMANDER:
+                case Constants.ShipType.EMPIRE_DEATH_STAR:
+                case Constants.ShipType.REBEL_MILLENIUM_FALCON:
+                    type = Constants.SpriteType.EXPLOSION_LARGE;
+                break;
+                default:
+                    type = Constants.SpriteType.EXPLOSION_SMALL;
+                break;
+            }
+        }
+        else
+        {
+            switch(ship.type)
+            {
+                default:
+                    type = Constants.SpriteType.EXPLOSION_SMALL;
+                break;
+            }
+        }
+        
+        //add explosion
+        addNewExplosion(explosionList, x, y, type, browserWidth, browserHeight);
+    }
+    
+    /**
+     * Add new explosion animation to list
+     */
+    function addNewExplosion(list:Array<GameObjects.SpriteSheetObject>, x:number, y:number,
         type:Constants.SpriteType, browserWidth:number, browserHeight:number) : void
     {
         switch(type)
         {
+            case Constants.SpriteType.EXPLOSION_LARGE:
+                list.push(new GameObjects.ExplosionLarge(x, y, browserWidth, browserHeight));
             case Constants.SpriteType.EXPLOSION_SMALL:
             default:
                 list.push(new GameObjects.ExplosionSmall(x, y, browserWidth, browserHeight));

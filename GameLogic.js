@@ -251,14 +251,51 @@ var GameLogic;
         });
     }
     GameLogic.incrementProjectilePosition = incrementProjectilePosition;
+    /**
+     * Create appropriate animation based on ship type and health remaining
+     */
+    function addHitAnimation(ship, list, browserWidth, browserHeight) {
+        var isDestroyed = ship.health > 0 ? false : true;
+        var x = ship.getExplosionX();
+        var y = ship.getExplosionY();
+        var type;
+        //check if destroyed
+        if (isDestroyed) {
+            switch (ship.type) {
+                case Constants.ShipType.EMPIRE_DESTROYER:
+                case Constants.ShipType.EMPIRE_COMMANDER:
+                case Constants.ShipType.EMPIRE_DEATH_STAR:
+                case Constants.ShipType.REBEL_MILLENIUM_FALCON:
+                    type = Constants.SpriteType.EXPLOSION_LARGE;
+                    break;
+                default:
+                    type = Constants.SpriteType.EXPLOSION_SMALL;
+                    break;
+            }
+        }
+        else {
+            switch (ship.type) {
+                default:
+                    type = Constants.SpriteType.EXPLOSION_SMALL;
+                    break;
+            }
+        }
+        //add explosion
+        addNewExplosion(explosionList, x, y, type, browserWidth, browserHeight);
+    }
+    GameLogic.addHitAnimation = addHitAnimation;
+    /**
+     * Add new explosion animation to list
+     */
     function addNewExplosion(list, x, y, type, browserWidth, browserHeight) {
         switch (type) {
+            case Constants.SpriteType.EXPLOSION_LARGE:
+                list.push(new GameObjects.ExplosionLarge(x, y, browserWidth, browserHeight));
             case Constants.SpriteType.EXPLOSION_SMALL:
             default:
                 list.push(new GameObjects.ExplosionSmall(x, y, browserWidth, browserHeight));
                 break;
         }
     }
-    GameLogic.addNewExplosion = addNewExplosion;
 })(GameLogic || (GameLogic = {}));
 //# sourceMappingURL=GameLogic.js.map

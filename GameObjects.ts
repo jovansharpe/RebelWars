@@ -8,6 +8,7 @@ module GameObjects {
     var isCommanderLoaded:boolean = false;
     var isDeathStarLoaded:boolean = false;
     var isExplosionSmallLoaded:boolean = false;
+    var isExplosionLargeLoaded:boolean = false;
 
     /**
      * Check if a specific ship types image has been loaded already
@@ -49,6 +50,9 @@ module GameObjects {
         {
             case Constants.SpriteType.EXPLOSION_SMALL:
                 loaded = isExplosionSmallLoaded;
+            break;
+            case Constants.SpriteType.EXPLOSION_LARGE:
+                loaded = isExplosionLargeLoaded;
             break;
         }
         
@@ -717,7 +721,6 @@ module GameObjects {
             if(this.loopCount > this.maxLoop)
             {
                 this.isFinished = true;
-                //alert('Loop done');
             }
         }
         
@@ -764,6 +767,24 @@ module GameObjects {
             var image:HTMLImageElement = new Image();
             image.src = 'images/SmallExplosion.png';
             image.onload = function(){ isExplosionSmallLoaded = true; }
+            this.objImage = image;
+        }
+    }
+    
+    /**
+     * Large explosion animation
+     */
+    export class ExplosionLarge extends SpriteSheetObject {
+        constructor(currentX:number, currentY:number, canvasWidth: number, canvasHeight: number)
+        {
+            //base constructor
+            super(currentX, currentY, canvasWidth, canvasHeight, 240, 1500, 6, 5, 
+                Constants.SpriteType.EXPLOSION_LARGE, 1, 1);
+            
+            //create & assign image
+            var image:HTMLImageElement = new Image();
+            image.src = 'images/LargeExplosion.png';
+            image.onload = function(){ isExplosionLargeLoaded = true; }
             this.objImage = image;
         }
     }

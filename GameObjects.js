@@ -12,6 +12,7 @@ var GameObjects;
     var isCommanderLoaded = false;
     var isDeathStarLoaded = false;
     var isExplosionSmallLoaded = false;
+    var isExplosionLargeLoaded = false;
     /**
      * Check if a specific ship types image has been loaded already
      */
@@ -45,6 +46,9 @@ var GameObjects;
         switch (type) {
             case Constants.SpriteType.EXPLOSION_SMALL:
                 loaded = isExplosionSmallLoaded;
+                break;
+            case Constants.SpriteType.EXPLOSION_LARGE:
+                loaded = isExplosionLargeLoaded;
                 break;
         }
         return loaded;
@@ -567,6 +571,23 @@ var GameObjects;
         return ExplosionSmall;
     })(SpriteSheetObject);
     GameObjects.ExplosionSmall = ExplosionSmall;
+    /**
+     * Large explosion animation
+     */
+    var ExplosionLarge = (function (_super) {
+        __extends(ExplosionLarge, _super);
+        function ExplosionLarge(currentX, currentY, canvasWidth, canvasHeight) {
+            //base constructor
+            _super.call(this, currentX, currentY, canvasWidth, canvasHeight, 240, 1500, 6, 5, Constants.SpriteType.EXPLOSION_LARGE, 1, 1);
+            //create & assign image
+            var image = new Image();
+            image.src = 'images/LargeExplosion.png';
+            image.onload = function () { isExplosionLargeLoaded = true; };
+            this.objImage = image;
+        }
+        return ExplosionLarge;
+    })(SpriteSheetObject);
+    GameObjects.ExplosionLarge = ExplosionLarge;
     /**
      * Base projectile class
      */

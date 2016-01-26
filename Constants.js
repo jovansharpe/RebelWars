@@ -39,7 +39,7 @@ var Constants;
             this.DEATH_STAR_IMPERIAL_SHOT_FIRE_RATE = 1;
             this.DEATH_STAR_IMPERIAL_MISSILE_LIMIT = 1;
             this.DEATH_STAR_IMPERIAL_MISSILE_FIRE_RATE = 3;
-            this.NUM_FIGHTERS_PER_LEVEL = 2;
+            this.NUM_FIGHTERS_PER_LEVEL = 3;
             this.NUM_DESTROYERS_PER_LEVEL = 1;
             this.MAX_SECONDS_MULTIPLIER_PER_LEVEL = 10;
             this.LEVEL_LOAD_BUFFER_SECONDS = 2;
@@ -141,6 +141,7 @@ var Constants;
     var ShipType = Constants_1.ShipType;
     (function (SpriteType) {
         SpriteType[SpriteType["EXPLOSION_SMALL"] = 0] = "EXPLOSION_SMALL";
+        SpriteType[SpriteType["EXPLOSION_LARGE"] = 1] = "EXPLOSION_LARGE";
     })(Constants_1.SpriteType || (Constants_1.SpriteType = {}));
     var SpriteType = Constants_1.SpriteType;
     (function (Direction) {

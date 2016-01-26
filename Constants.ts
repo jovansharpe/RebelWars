@@ -37,7 +37,7 @@ module Constants {
         DEATH_STAR_IMPERIAL_SHOT_FIRE_RATE = 1;
         DEATH_STAR_IMPERIAL_MISSILE_LIMIT = 1;
         DEATH_STAR_IMPERIAL_MISSILE_FIRE_RATE = 3;
-        NUM_FIGHTERS_PER_LEVEL = 2;
+        NUM_FIGHTERS_PER_LEVEL = 3;
         NUM_DESTROYERS_PER_LEVEL = 1;
         MAX_SECONDS_MULTIPLIER_PER_LEVEL = 10;
         LEVEL_LOAD_BUFFER_SECONDS = 2;
@@ -139,7 +139,8 @@ module Constants {
     }
     
     export enum SpriteType {
-        EXPLOSION_SMALL
+        EXPLOSION_SMALL,
+        EXPLOSION_LARGE
     }
     
     export enum Direction {
