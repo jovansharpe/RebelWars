@@ -30,6 +30,10 @@ var GameLogic;
         else if (currentLevel % CONSTANTS.COMMANDER_LEVEL_FACTOR == 0) {
             addEnemyShips(bossList, 1, Constants.ShipType.EMPIRE_COMMANDER, browserWidth, browserHeight, currentLevel);
         }
+        //check if boss added
+        if (bossList.length > 0) {
+            AddBossMessage(); //notify user
+        }
         return bossList;
     }
     GameLogic.getBossListByLevel = getBossListByLevel;
@@ -121,9 +125,25 @@ var GameLogic;
             var missile = new GameObjects.Projectile(0, 0, CONSTANTS.MISSILE_SPEED, browserWidth, browserHeight, Constants.ProjectileType.MISSILE, id, 0, radius, color, damage);
             //add missile
             missileList.push(missile);
+            //notify user
+            AddMissileMessage();
         }
     }
     GameLogic.equipMissiles = equipMissiles;
+    /**
+     * Check if user has advanced far enough to earn extra health
+     */
+    function checkRebelShipHealth(ship, currentLevel) {
+        //check if current level is multiple
+        if (currentLevel % CONSTANTS.ADD_HEALTH_LEVEL == 0) {
+            //add health
+            ship.maxHealth += 1;
+            ship.health += 1;
+            //notify user
+            AddHealthMessage(1);
+        }
+    }
+    GameLogic.checkRebelShipHealth = checkRebelShipHealth;
     /**
      * Create list populated with Projectile projects
      */
@@ -138,12 +158,6 @@ var GameLogic;
                 color = CONSTANTS.MISSLE_PINK;
                 damage = CONSTANTS.MISSILE_DAMAGE;
                 break;
-            case Constants.ProjectileType.CANNON_SHOT:
-            default:
-                radius = CONSTANTS.CANNON_SHOT_RADIUS;
-                color = CONSTANTS.CANNON_SHOT_BLUE;
-                damage = CONSTANTS.CANNON_SHOT_DAMAGE;
-                break;
             case Constants.ProjectileType.IMPERIAL_SHOT:
                 radius = CONSTANTS.IMPERIAL_SHOT_RADIUS;
                 color = CONSTANTS.IMPERIAL_RED;
@@ -153,6 +167,11 @@ var GameLogic;
                 radius = CONSTANTS.IMPERIAL_MISSILE_RADIUS;
                 color = CONSTANTS.IMPERIAL_ORANGE;
                 damage = CONSTANTS.IMPERIAL_MISSILE_DAMAGE;
+                break;
+            default:
+                radius = CONSTANTS.CANNON_SHOT_RADIUS;
+                color = CONSTANTS.CANNON_SHOT_BLUE;
+                damage = CONSTANTS.CANNON_SHOT_DAMAGE;
                 break;
         }
         for (var i = 0; i < limit; i++) {
@@ -297,5 +316,33 @@ var GameLogic;
                 break;
         }
     }
+    /**
+     * Add new message with properties based on type
+     */
+    function addNewMessage(list, type, text, startX, startY, fontSize) {
+        var font = fontSize.toString() + "px 'Orbitron'";
+        var colorRgb1;
+        var colorRgb2 = CONSTANTS.FILL_YELLOW;
+        switch (type) {
+            case Constants.MessageType.ADD_HEALTH:
+            case Constants.MessageType.ADD_MISSILE:
+                colorRgb1 = CONSTANTS.FILL_GREEN;
+                colorRgb2 = CONSTANTS.FILL_RED;
+                break;
+            case Constants.MessageType.HIGH_SCORE:
+                colorRgb1 = CONSTANTS.FILL_RED;
+                break;
+            case Constants.MessageType.NEW_BOSS:
+                colorRgb1 = CONSTANTS.FILL_ORANGE;
+                colorRgb2 = CONSTANTS.FILL_WHITE;
+                break;
+            default:
+                colorRgb1 = CONSTANTS.FILL_WHITE;
+                break;
+        }
+        //add message
+        list.push(new GameObjects.Message(type, text, font, colorRgb1, colorRgb2, startX, startY));
+    }
+    GameLogic.addNewMessage = addNewMessage;
 })(GameLogic || (GameLogic = {}));
 //# sourceMappingURL=GameLogic.js.map

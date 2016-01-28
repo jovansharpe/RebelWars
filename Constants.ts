@@ -4,7 +4,6 @@ module Constants {
      */
     export class Constants {
         //game mgmt settings
-        DEBUG_MODE:boolean = false;
         DEFAULT_START_LEVEL:number = 1;
         DEFAULT_HIGH_SCORE_COOKIE_NAME:string = 'RebelWarsHighScores';
         INFO_TEXT_SPACING = 18;
@@ -13,6 +12,7 @@ module Constants {
         KEY_UP:number = 38;
         KEY_RIGHT:number = 39;
         KEY_DOWN:number = 40;
+        KEY_SPACEBAR:number = 32;
         //dimensions
         CLIENT_WINDOW_MARGIN:number = 10;
         CANNON_SHOT_RADIUS:number = 4;
@@ -28,6 +28,9 @@ module Constants {
         TIE_FIGHTER_HEIGHT_HIT_FACTOR = 2;
         COMMANDER_HEIGHT_HIT_FACTOR = 2;
         DEATH_STAR_HEIGHT_HIT_FACTOR = 2;
+        MESSAGE_RISE_FACTOR_Y = 1;
+        MESSAGE_EXPIRE_COUNT = 175;
+        MESSAGE_THROTTLE_COUNT = 50; 
         //limits
         MISSILE_LIMIT = 1;
         CANNON_SHOT_LIMIT = 10;
@@ -41,9 +44,10 @@ module Constants {
         NUM_DESTROYERS_PER_LEVEL = 1;
         MAX_SECONDS_MULTIPLIER_PER_LEVEL = 10;
         LEVEL_LOAD_BUFFER_SECONDS = 2;
-        COMMANDER_LEVEL_FACTOR = 1;
-        DEATH_STAR_LEVEL_FACTOR = 2;
-        ADD_MISSILE_LEVEL = 5;
+        COMMANDER_LEVEL_FACTOR = 3;
+        DEATH_STAR_LEVEL_FACTOR = 5;
+        ADD_MISSILE_LEVEL = 3;
+        ADD_HEALTH_LEVEL = 5;
         //speeds
         BASE_SPEED:number = 256;
         REBEL_SHIP_SPEED:number = this.BASE_SPEED;
@@ -77,7 +81,7 @@ module Constants {
         DESTROYER_HEALTH:number = 5;
         COMMANDER_HEALTH:number = 20;
         DEATH_STAR_HEALTH:number = 50;
-        REBEL_SHIP_HEALTH:number = 999999999;
+        REBEL_SHIP_HEALTH:number = 3;
         //directions
         DEFAULT_DIRECTION_CHANGE_SECONDS = 5;
         /**
@@ -148,6 +152,14 @@ module Constants {
         LEFT,
         UP,
         DOWN
+    }
+    
+    export enum MessageType {
+        GENERIC,
+        ADD_MISSILE,
+        ADD_HEALTH,
+        NEW_BOSS,
+        HIGH_SCORE
     }
 }
 

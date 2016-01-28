@@ -46,7 +46,13 @@ module GameLogic {
             addEnemyShips(bossList, 1, Constants.ShipType.EMPIRE_COMMANDER, 
                 browserWidth, browserHeight, currentLevel);
         }
-            
+        
+        //check if boss added
+        if(bossList.length > 0)
+        {
+            AddBossMessage(); //notify user
+        }
+        
         return bossList;
     }
 
@@ -145,7 +151,7 @@ module GameLogic {
      * Reset missiles and their availability based on current level
      */
     export function equipMissiles(currentLevel:number, missileList:Array<GameObjects.Projectile>,
-        browserWidth:number, browserHeight:number)
+        browserWidth:number, browserHeight:number) : void
     {
         //check if current level is multiple
         if( currentLevel % CONSTANTS.ADD_MISSILE_LEVEL == 0 )
@@ -158,8 +164,29 @@ module GameLogic {
             var missile:GameObjects.Projectile = new GameObjects.Projectile(0,0,CONSTANTS.MISSILE_SPEED,
                 browserWidth,browserHeight,Constants.ProjectileType.MISSILE,
                 id,0,radius, color, damage);
+                
             //add missile
             missileList.push(missile);
+            
+            //notify user
+            AddMissileMessage();
+        }
+    }
+    
+    /**
+     * Check if user has advanced far enough to earn extra health
+     */
+    export function checkRebelShipHealth(ship:GameObjects.RebelShipObject, currentLevel:number) : void
+    {
+        //check if current level is multiple
+        if( currentLevel % CONSTANTS.ADD_HEALTH_LEVEL == 0 )
+        {
+            //add health
+            ship.maxHealth += 1;
+            ship.health += 1;
+            
+            //notify user
+            AddHealthMessage(1);
         }
     }
 
@@ -181,12 +208,6 @@ module GameLogic {
                 color = CONSTANTS.MISSLE_PINK;
                 damage = CONSTANTS.MISSILE_DAMAGE;
             break;
-            case Constants.ProjectileType.CANNON_SHOT:
-            default:
-                radius = CONSTANTS.CANNON_SHOT_RADIUS;
-                color = CONSTANTS.CANNON_SHOT_BLUE;
-                damage = CONSTANTS.CANNON_SHOT_DAMAGE;
-            break;
             case Constants.ProjectileType.IMPERIAL_SHOT:
                 radius = CONSTANTS.IMPERIAL_SHOT_RADIUS;
                 color = CONSTANTS.IMPERIAL_RED;
@@ -196,6 +217,11 @@ module GameLogic {
                 radius = CONSTANTS.IMPERIAL_MISSILE_RADIUS;
                 color = CONSTANTS.IMPERIAL_ORANGE;
                 damage = CONSTANTS.IMPERIAL_MISSILE_DAMAGE;
+            break;
+            default:
+                radius = CONSTANTS.CANNON_SHOT_RADIUS;
+                color = CONSTANTS.CANNON_SHOT_BLUE;
+                damage = CONSTANTS.CANNON_SHOT_DAMAGE;
             break;
         }
         
@@ -375,5 +401,39 @@ module GameLogic {
                 list.push(new GameObjects.ExplosionSmall(x, y, browserWidth, browserHeight));
             break;
         }
+    }
+    
+    /**
+     * Add new message with properties based on type
+     */
+    export function addNewMessage(list:Array<GameObjects.Message>, type:Constants.MessageType,
+        text:string, startX:number, startY:number, fontSize:number)
+    {
+        var font:string = fontSize.toString() + "px 'Orbitron'";
+        var colorRgb1:string;
+        var colorRgb2:string = CONSTANTS.FILL_YELLOW;
+        
+        switch(type)
+        {
+            case Constants.MessageType.ADD_HEALTH:
+            case Constants.MessageType.ADD_MISSILE:
+                colorRgb1 = CONSTANTS.FILL_GREEN;
+                colorRgb2 = CONSTANTS.FILL_RED;
+            break;
+            case Constants.MessageType.HIGH_SCORE:
+                colorRgb1 = CONSTANTS.FILL_RED;
+            break;
+            case Constants.MessageType.NEW_BOSS:
+                colorRgb1 = CONSTANTS.FILL_ORANGE;
+                colorRgb2 = CONSTANTS.FILL_WHITE;
+            break;
+            default:
+                colorRgb1 = CONSTANTS.FILL_WHITE;
+            break;
+        }
+        
+        //add message
+        list.push(new GameObjects.Message(type, text, font, colorRgb1, colorRgb2, 
+            startX, startY));
     }
 }

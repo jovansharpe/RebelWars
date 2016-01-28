@@ -136,7 +136,6 @@ module Vector {
         minLocationY: number, maxLocationY: number): Waypoint {
         var randomX: number = GameLogic.getRandomInteger(minLocationX, maxLocationX);
         var randomY: number = GameLogic.getRandomInteger(minLocationY, maxLocationY);
-
         return new Waypoint(randomX, randomY);
     }
 }

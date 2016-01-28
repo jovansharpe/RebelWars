@@ -918,22 +918,28 @@ module GameObjects {
      * Class to store user score data
      */
     export class Score {
+        displayName:string;
         name:string;
         gameDate:Date;
         killList:Array<EnemyKill>;
         levelStart:number;
         levelFinish:number;
         currentScore:number;
+        highScore:number;
+        highScoreDisplayed:boolean;
         
-        constructor(name:string, level:number)
+        constructor(displayName:string, level:number)
         {
             //assign
-            this.name = name;
+            this.displayName = displayName;
+            this.name = displayName.replace(' ','');
             this.levelStart = level;
             //defaults
             this.killList = new Array<EnemyKill>();
             this.gameDate = new Date(Date.now());
             this.currentScore = 0;
+            this.highScore = 0;
+            this.highScoreDisplayed = false;
         }
         
         /**
@@ -945,6 +951,14 @@ module GameObjects {
             this.killList.push(new EnemyKill(enemy,enemyStart,enemyMaxHealth,level));
             //update numeric score
             this.currentScore += enemyMaxHealth;
+        }
+        
+        /**
+         * Check if current score is greater than previous high score
+         */
+        isHighScore()
+        {
+            return (this.currentScore > this.highScore);
         }
     }
 
@@ -959,6 +973,93 @@ module GameObjects {
         {
             this.name = name;
             this.score = score;
+        }
+    }
+
+    export class Message {
+        type:Constants.MessageType;
+        text:string;
+        font:string;
+        colorRgb1:string;
+        colorRgb2:string;
+        x:number;
+        y:number;
+        isMainColor:boolean;
+        renderCount:number;
+        
+        constructor(type:Constants.MessageType, text:string, font:string, colorRgb1:string, 
+            colorRgb2:string, x:number, y:number)
+        {
+            this.type = type;
+            this.text = text;
+            this.font = font;
+            this.colorRgb1 = colorRgb1;
+            this.colorRgb2 = colorRgb2;
+            this.x = x;
+            this.y = y;
+            
+            //default
+            this.isMainColor = false;
+            this.renderCount = 0;
+        }
+        
+        /**
+         * Update increment count
+         */
+        incrementCount() : void
+        {
+            this.renderCount += 1;
+            
+            if(this.renderCount % 5 == 0)
+            {
+                //reverse flag to alternate color each call
+                this.isMainColor = !this.isMainColor;
+            }
+        }
+        
+        /**
+         * Get color of message to use
+         */
+        getCurrentColor() : string
+        {            
+            if(this.isMainColor)
+            {
+                return this.colorRgb1;
+            }
+            else
+            {
+                return this.colorRgb2;
+            }
+        }
+        
+        getCurrentX() : number
+        {
+            return this.x;
+        }
+        
+        getCurrentY() : number
+        {
+            var currentY = this.y;
+            
+            this.y -= CONSTANTS.MESSAGE_RISE_FACTOR_Y;
+            
+            return currentY;
+        }
+        
+        /**
+         * Check if message render count has exceeded limit.
+         * If so, the message should stop appearing.
+         */
+        isExpired()
+        {
+            if(this.renderCount > CONSTANTS.MESSAGE_EXPIRE_COUNT)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 

@@ -677,14 +677,17 @@ var GameObjects;
      * Class to store user score data
      */
     var Score = (function () {
-        function Score(name, level) {
+        function Score(displayName, level) {
             //assign
-            this.name = name;
+            this.displayName = displayName;
+            this.name = displayName.replace(' ', '');
             this.levelStart = level;
             //defaults
             this.killList = new Array();
             this.gameDate = new Date(Date.now());
             this.currentScore = 0;
+            this.highScore = 0;
+            this.highScoreDisplayed = false;
         }
         /**
          * Add to current score
@@ -694,6 +697,12 @@ var GameObjects;
             this.killList.push(new EnemyKill(enemy, enemyStart, enemyMaxHealth, level));
             //update numeric score
             this.currentScore += enemyMaxHealth;
+        };
+        /**
+         * Check if current score is greater than previous high score
+         */
+        Score.prototype.isHighScore = function () {
+            return (this.currentScore > this.highScore);
         };
         return Score;
     })();
@@ -709,5 +718,62 @@ var GameObjects;
         return HighScore;
     })();
     GameObjects.HighScore = HighScore;
+    var Message = (function () {
+        function Message(type, text, font, colorRgb1, colorRgb2, x, y) {
+            this.type = type;
+            this.text = text;
+            this.font = font;
+            this.colorRgb1 = colorRgb1;
+            this.colorRgb2 = colorRgb2;
+            this.x = x;
+            this.y = y;
+            //default
+            this.isMainColor = false;
+            this.renderCount = 0;
+        }
+        /**
+         * Update increment count
+         */
+        Message.prototype.incrementCount = function () {
+            this.renderCount += 1;
+            if (this.renderCount % 5 == 0) {
+                //reverse flag to alternate color each call
+                this.isMainColor = !this.isMainColor;
+            }
+        };
+        /**
+         * Get color of message to use
+         */
+        Message.prototype.getCurrentColor = function () {
+            if (this.isMainColor) {
+                return this.colorRgb1;
+            }
+            else {
+                return this.colorRgb2;
+            }
+        };
+        Message.prototype.getCurrentX = function () {
+            return this.x;
+        };
+        Message.prototype.getCurrentY = function () {
+            var currentY = this.y;
+            this.y -= CONSTANTS.MESSAGE_RISE_FACTOR_Y;
+            return currentY;
+        };
+        /**
+         * Check if message render count has exceeded limit.
+         * If so, the message should stop appearing.
+         */
+        Message.prototype.isExpired = function () {
+            if (this.renderCount > CONSTANTS.MESSAGE_EXPIRE_COUNT) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        };
+        return Message;
+    })();
+    GameObjects.Message = Message;
 })(GameObjects || (GameObjects = {}));
 //# sourceMappingURL=GameObjects.js.map

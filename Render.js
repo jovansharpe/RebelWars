@@ -223,9 +223,27 @@ var Render;
     }
     Render.drawEnemyShips = drawEnemyShips;
     /**
+     * Render list of enemy ships but do not process collision detection
+     */
+    function drawDummyShips(canvasContext, timeNow, enemyShipList) {
+        //check if context is valid
+        //and that there are enemies to render
+        if (canvasContext && enemyShipList.length > 0) {
+            for (var i = 0; i < enemyShipList.length; i++) {
+                //check if image has been loaded
+                //and if timing is valid
+                if (GameObjects.isShipLoaded(enemyShipList[i].type) && enemyShipList[i].startTimeIsValid(timeNow)) {
+                    //render object
+                    canvasContext.drawImage(enemyShipList[i].objImage, enemyShipList[i].getLocationX(), enemyShipList[i].getLocationY());
+                }
+            }
+        }
+    }
+    Render.drawDummyShips = drawDummyShips;
+    /**
      * Render current Score and Health
      */
-    function drawInfoPanel(canvasContext, currentLevel, enemies, rebelShipHealth, missileList) {
+    function drawInfoPanel(canvasContext, currentLevel, enemies, rebelShipHealth, rebelShipMaxHealth, missileList) {
         if (canvasContext) {
             var level = "Level: " + currentLevel;
             var remainingEnemies = "Empire: " + enemies.toString();
@@ -244,14 +262,15 @@ var Render;
             canvasContext.fillText(remainingEnemies, CONSTANTS.INFO_TEXT_SPACING, CONSTANTS.INFO_TEXT_SPACING * 2);
             canvasContext.fillText(missiles, CONSTANTS.INFO_TEXT_SPACING, CONSTANTS.INFO_TEXT_SPACING * 3);
             //Ship Health
-            if (rebelShipHealth == 1) {
-                canvasContext.fillStyle = CONSTANTS.FILL_RED; //about to die
+            var precent = (rebelShipHealth * 100) / rebelShipMaxHealth;
+            if (precent >= 90) {
+                canvasContext.fillStyle = CONSTANTS.FILL_GREEN; //health is good
             }
-            else if (rebelShipHealth == 2) {
+            else if (precent >= 50) {
                 canvasContext.fillStyle = CONSTANTS.FILL_LIGHT_BLUE; //injured
             }
             else {
-                canvasContext.fillStyle = CONSTANTS.FILL_GREEN; //health is good
+                canvasContext.fillStyle = CONSTANTS.FILL_RED; //about to die
             }
             //draw health
             canvasContext.fillText(health, CONSTANTS.INFO_TEXT_SPACING, CONSTANTS.INFO_TEXT_SPACING * 4);
@@ -264,6 +283,43 @@ var Render;
         }
     }
     Render.drawInfoPanel = drawInfoPanel;
+    /**
+     * Render list of messages
+     */
+    function drawMessageList(canvasContext, messageList) {
+        //check if canvas valid & messages present
+        if (canvasContext && messageList.length > 0) {
+            var prevCount = 0;
+            //loop through messages
+            for (var i = 0; i < messageList.length; i++) {
+                if (prevCount == 0 || prevCount > CONSTANTS.MESSAGE_THROTTLE_COUNT) {
+                    //draw message
+                    drawMessage(canvasContext, messageList[i]);
+                    //check for expiration
+                    if (messageList[i].isExpired()) {
+                        messageList.splice(i, 1);
+                        prevCount = 0;
+                    }
+                    else {
+                        prevCount = messageList[i].renderCount;
+                    }
+                }
+            }
+        }
+    }
+    Render.drawMessageList = drawMessageList;
+    /**
+     * Render individual message
+     */
+    function drawMessage(canvasContext, msg) {
+        canvasContext.textAlign = "center";
+        canvasContext.textBaseline = "top";
+        canvasContext.font = msg.font;
+        canvasContext.fillStyle = msg.getCurrentColor();
+        canvasContext.fillText(msg.text, msg.getCurrentX(), msg.getCurrentY());
+        //increment render count
+        msg.incrementCount();
+    }
     /**
      * Draw all hero projectiles to canvas
      */
@@ -332,5 +388,13 @@ var Render;
         }
     }
     Render.drawExplosions = drawExplosions;
+    function drawTitle(canvasContext) {
+        canvasContext.textAlign = "center";
+        canvasContext.textBaseline = "top";
+        canvasContext.font = "80px 'Orbitron'";
+        canvasContext.fillStyle = CONSTANTS.FILL_WHITE;
+        canvasContext.fillText("REBEL WARS", browserWidth / 2, browserHeight / 4);
+    }
+    Render.drawTitle = drawTitle;
 })(Render || (Render = {}));
 //# sourceMappingURL=Render.js.map

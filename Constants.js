@@ -6,7 +6,6 @@ var Constants;
     var Constants = (function () {
         function Constants() {
             //game mgmt settings
-            this.DEBUG_MODE = false;
             this.DEFAULT_START_LEVEL = 1;
             this.DEFAULT_HIGH_SCORE_COOKIE_NAME = 'RebelWarsHighScores';
             this.INFO_TEXT_SPACING = 18;
@@ -15,6 +14,7 @@ var Constants;
             this.KEY_UP = 38;
             this.KEY_RIGHT = 39;
             this.KEY_DOWN = 40;
+            this.KEY_SPACEBAR = 32;
             //dimensions
             this.CLIENT_WINDOW_MARGIN = 10;
             this.CANNON_SHOT_RADIUS = 4;
@@ -30,6 +30,9 @@ var Constants;
             this.TIE_FIGHTER_HEIGHT_HIT_FACTOR = 2;
             this.COMMANDER_HEIGHT_HIT_FACTOR = 2;
             this.DEATH_STAR_HEIGHT_HIT_FACTOR = 2;
+            this.MESSAGE_RISE_FACTOR_Y = 1;
+            this.MESSAGE_EXPIRE_COUNT = 175;
+            this.MESSAGE_THROTTLE_COUNT = 50;
             //limits
             this.MISSILE_LIMIT = 1;
             this.CANNON_SHOT_LIMIT = 10;
@@ -43,9 +46,10 @@ var Constants;
             this.NUM_DESTROYERS_PER_LEVEL = 1;
             this.MAX_SECONDS_MULTIPLIER_PER_LEVEL = 10;
             this.LEVEL_LOAD_BUFFER_SECONDS = 2;
-            this.COMMANDER_LEVEL_FACTOR = 1;
-            this.DEATH_STAR_LEVEL_FACTOR = 2;
-            this.ADD_MISSILE_LEVEL = 5;
+            this.COMMANDER_LEVEL_FACTOR = 3;
+            this.DEATH_STAR_LEVEL_FACTOR = 5;
+            this.ADD_MISSILE_LEVEL = 3;
+            this.ADD_HEALTH_LEVEL = 5;
             //speeds
             this.BASE_SPEED = 256;
             this.REBEL_SHIP_SPEED = this.BASE_SPEED;
@@ -79,7 +83,7 @@ var Constants;
             this.DESTROYER_HEALTH = 5;
             this.COMMANDER_HEALTH = 20;
             this.DEATH_STAR_HEALTH = 50;
-            this.REBEL_SHIP_HEALTH = 999999999;
+            this.REBEL_SHIP_HEALTH = 3;
             //directions
             this.DEFAULT_DIRECTION_CHANGE_SECONDS = 5;
         }
@@ -151,5 +155,13 @@ var Constants;
         Direction[Direction["DOWN"] = 3] = "DOWN";
     })(Constants_1.Direction || (Constants_1.Direction = {}));
     var Direction = Constants_1.Direction;
+    (function (MessageType) {
+        MessageType[MessageType["GENERIC"] = 0] = "GENERIC";
+        MessageType[MessageType["ADD_MISSILE"] = 1] = "ADD_MISSILE";
+        MessageType[MessageType["ADD_HEALTH"] = 2] = "ADD_HEALTH";
+        MessageType[MessageType["NEW_BOSS"] = 3] = "NEW_BOSS";
+        MessageType[MessageType["HIGH_SCORE"] = 4] = "HIGH_SCORE";
+    })(Constants_1.MessageType || (Constants_1.MessageType = {}));
+    var MessageType = Constants_1.MessageType;
 })(Constants || (Constants = {}));
 //# sourceMappingURL=Constants.js.map

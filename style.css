@@ -12,16 +12,16 @@ img.centered {
     margin-left: auto;
     margin-right: auto; }
 
-#highScoreDiv {
+#welcomeHighScoreDiv {
     margin-top: 10px;
 }
 
-#highScoreDiv table{
+#welcomeHighScoreDiv table{
     width: 80%;
     margin: auto;
 }
 
-#highScoreDiv table tr td{
+#welcomeHighScoreDiv table tr td{
 	text-align:center;
 }
 

@@ -304,10 +304,34 @@ module Render {
     }
 
     /**
+     * Render list of enemy ships but do not process collision detection
+     */
+    export function drawDummyShips(canvasContext:CanvasRenderingContext2D, timeNow:number,
+        enemyShipList:Array<GameObjects.ShipObject>)
+    {  
+        //check if context is valid
+        //and that there are enemies to render
+        if (canvasContext && enemyShipList.length > 0) 
+        {        
+            for(var i = 0; i < enemyShipList.length; i++)
+            {
+                //check if image has been loaded
+                //and if timing is valid
+                if (GameObjects.isShipLoaded(enemyShipList[i].type) && enemyShipList[i].startTimeIsValid(timeNow)) 
+                {
+                    //render object
+                    canvasContext.drawImage(enemyShipList[i].objImage, enemyShipList[i].getLocationX(), 
+                        enemyShipList[i].getLocationY());
+                }
+            }
+        }
+    }
+
+    /**
      * Render current Score and Health
      */
     export function drawInfoPanel(canvasContext:CanvasRenderingContext2D, currentLevel:number,
-        enemies:number, rebelShipHealth:number, missileList:Array<GameObjects.Projectile>)
+        enemies:number, rebelShipHealth:number, rebelShipMaxHealth:number, missileList:Array<GameObjects.Projectile>)
     {
         if(canvasContext)
         {
@@ -332,17 +356,18 @@ module Render {
             canvasContext.fillText(missiles, CONSTANTS.INFO_TEXT_SPACING, CONSTANTS.INFO_TEXT_SPACING * 3);
             
             //Ship Health
-            if(rebelShipHealth == 1)
+            var precent:number = (rebelShipHealth * 100) / rebelShipMaxHealth;
+            if(precent >= 90)
             {
-                canvasContext.fillStyle = CONSTANTS.FILL_RED; //about to die
+                canvasContext.fillStyle = CONSTANTS.FILL_GREEN; //health is good
             }
-            else if(rebelShipHealth == 2)
+            else if(precent >= 50)
             {
                 canvasContext.fillStyle = CONSTANTS.FILL_LIGHT_BLUE; //injured
             }
             else
             {
-                canvasContext.fillStyle = CONSTANTS.FILL_GREEN; //health is good
+                canvasContext.fillStyle = CONSTANTS.FILL_RED; //about to die
             }
             //draw health
             canvasContext.fillText(health, CONSTANTS.INFO_TEXT_SPACING, CONSTANTS.INFO_TEXT_SPACING * 4);
@@ -357,6 +382,52 @@ module Render {
             }
             
         }
+    }
+
+    /**
+     * Render list of messages
+     */
+    export function drawMessageList(canvasContext:CanvasRenderingContext2D, messageList:Array<GameObjects.Message>)
+    {
+        //check if canvas valid & messages present
+        if(canvasContext && messageList.length > 0)
+        {
+            var prevCount:number = 0;
+            
+            //loop through messages
+            for(var i = 0; i < messageList.length; i++)
+            {
+                if(prevCount == 0 || prevCount > CONSTANTS.MESSAGE_THROTTLE_COUNT)
+                {
+                    //draw message
+                    drawMessage(canvasContext, messageList[i]);
+                    //check for expiration
+                    if(messageList[i].isExpired())
+                    {
+                        messageList.splice(i,1);
+                        prevCount = 0;
+                    }
+                    else
+                    {
+                        prevCount = messageList[i].renderCount;
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Render individual message
+     */
+    function drawMessage(canvasContext:CanvasRenderingContext2D, msg:GameObjects.Message)
+    {
+        canvasContext.textAlign = "center";
+        canvasContext.textBaseline = "top";
+        canvasContext.font = msg.font;
+        canvasContext.fillStyle = msg.getCurrentColor();
+        canvasContext.fillText(msg.text, msg.getCurrentX(), msg.getCurrentY());
+        //increment render count
+        msg.incrementCount();
     }
 
     /**
@@ -441,5 +512,14 @@ module Render {
                 }
             }
         }
+    }
+    
+    export function drawTitle(canvasContext:CanvasRenderingContext2D)
+    {
+        canvasContext.textAlign = "center";
+        canvasContext.textBaseline = "top";
+        canvasContext.font = "80px 'Orbitron'";
+        canvasContext.fillStyle = CONSTANTS.FILL_WHITE;
+        canvasContext.fillText("REBEL WARS", browserWidth / 2, browserHeight / 4);
     }
 }

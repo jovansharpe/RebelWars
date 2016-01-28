@@ -42,8 +42,9 @@ var rebelShip:GameObjects.RebelShipObject = new GameObjects.RebelShipObject(brow
 
 //list of explosion sprites
 var explosionList:Array<GameObjects.SpriteSheetObject> = new Array<GameObjects.SpriteSheetObject>();
-//explosionList.push(new GameObjects.ExplosionSmall(browserWidth/2,browserHeight/2,browserWidth,browserHeight));
 
+//list to store message to user
+var messageList:Array<GameObjects.Message> = new Array<GameObjects.Message>();
 
 //list of enemy ships
 var enemyShipList:Array<GameObjects.ShipObject> = new Array<GameObjects.ShipObject>();
@@ -73,40 +74,30 @@ document.addEventListener("keyup",keyUpHandler,false);
 
 //init game mgmt vars
 var intervalHolder:number = null;
+var atStartScreen:boolean = true;
 var isGameReady:boolean = false;
 var currentLevel:number = CONSTANTS.DEFAULT_START_LEVEL;
 var timePrevious:number = Date.now();
 
 //init user stats
-var currentUserScore:GameObjects.Score = new GameObjects.Score("Player 1",currentLevel);
-var currentUserHighScore:GameObjects.HighScore = new GameObjects.HighScore();
+var currentUserScore:GameObjects.Score = new GameObjects.Score("Anonymous",CONSTANTS.DEFAULT_START_LEVEL);
 var highScoreList:Array<GameObjects.HighScore> = new Array<GameObjects.HighScore>();
 
-//get user input
-if(!CONSTANTS.DEBUG_MODE)
+//check if start screen showing
+if(atStartScreen)
 {
-    Modal.openWelcomeWindow(highScoreList);
+    //reset time var
+    timePrevious = Date.now();
+    
+    showStartScreen();
 }
 else
 {
-    startDebugGame();
+    //get user input
+    Modal.openWelcomeWindow(highScoreList); 
 }
 
 /*** GAME FUNCTIONS ***/
-
-/**
- * Bypass welcome screen & init default values to get straight to game
- */
-function startDebugGame()
-{
-    var name:string = "Kylo Ren";
-    //init user data obj
-    currentLevel = CONSTANTS.DEFAULT_START_LEVEL;
-    currentUserScore = new GameObjects.Score(name, currentLevel);
-    currentUserHighScore = new GameObjects.HighScore(name, 0);
-    //start game
-    startGame();  
-}
 
 /**
  * Reset game state and advance to next level
@@ -119,11 +110,14 @@ function continueGame()
     //increment new level
     currentLevel += 1;
     
+    //reset objects
+    resetObjects();
+    
     //check missiles
     GameLogic.equipMissiles(currentLevel, missileList, browserWidth, browserHeight);
     
-    //reset objects
-    resetObjects();
+    //check ship health
+    GameLogic.checkRebelShipHealth(rebelShip, currentLevel);
     
     //create enemies
     loadEnemies();
@@ -146,6 +140,13 @@ function startOver()
     //increment new level
     currentLevel = CONSTANTS.DEFAULT_START_LEVEL;
     
+    //reset objects
+    resetObjects();
+    
+    //reset score
+    currentUserScore.levelStart = currentLevel;
+    currentUserScore.currentScore = 0;
+    
     //reset missile limit
     missileList = GameLogic.getPopulatedProjectileList(Constants.ProjectileType.MISSILE, 
         CONSTANTS.MISSILE_SPEED,
@@ -153,11 +154,11 @@ function startOver()
         gameCanvas.width,
         gameCanvas.height);
     
-    //reset objects
-    resetObjects();
-    
     //create enemies for this level
     loadEnemies();
+    
+    //notify user
+    AddGameStartMessage();
     
     //reset time var
     timePrevious = Date.now();
@@ -175,6 +176,12 @@ function loadEnemies()
     bossList = GameLogic.getBossListByLevel(currentLevel, browserWidth, browserHeight);
 }
 
+function loadDummyEnemies()
+{
+    //create enemies
+    enemyShipList = GameLogic.buildEnemyListByLevel(10, browserWidth, browserHeight);    
+}
+
 /**
  * Reset game objects
  */
@@ -190,6 +197,61 @@ function resetObjects()
     //reset user input
     rightArrowKeyed = false;
     leftArrowKeyed = false;
+    
+    //reset messages
+    messageList.splice(0);
+}
+
+function GetMessageLocationX() : number
+{
+    return (browserWidth / 2);
+}
+
+function GetMessageLocationY() : number
+{
+    return (browserHeight - (rebelShip.objImage.naturalHeight * 2));
+}
+
+function AddGameStartMessage() : void
+{
+    //add message
+    GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "*** START GAME ***", 
+        GetMessageLocationX(), GetMessageLocationY(), 32);
+}
+
+function AddHealthMessage(amount:number) : void
+{
+    //add message
+    GameLogic.addNewMessage(messageList, Constants.MessageType.ADD_HEALTH, "+" + amount.toString() + " Health", 
+        GetMessageLocationX(), GetMessageLocationY(), 24);
+}
+
+function AddMissileMessage() : void
+{
+    //add message
+    GameLogic.addNewMessage(messageList, Constants.MessageType.ADD_MISSILE, "+1 Missile", 
+        GetMessageLocationX(), GetMessageLocationY(), 24);
+}
+
+function AddBossMessage() : void
+{
+    //add message
+    GameLogic.addNewMessage(messageList, Constants.MessageType.NEW_BOSS, "^^^ BOSS DETECTED ^^^", 
+        GetMessageLocationX(), GetMessageLocationY(), 32);
+}
+
+function AddHighScoreMessage() : void
+{
+    //add message
+    GameLogic.addNewMessage(messageList, Constants.MessageType.NEW_BOSS, "*** HIGH SCORE ***", 
+        GetMessageLocationX(), GetMessageLocationY(), 32);
+}
+
+function AddPressSpacebarMessage() : void
+{
+    //add message
+    GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "*** PRESS SPACEBAR TO START ***", 
+        GetMessageLocationX(), GetMessageLocationY(), 32);
 }
 
 /**
@@ -198,6 +260,14 @@ function resetObjects()
 function getRemainingEnemies() : number
 {
     return enemyShipList.length + bossList.length;
+}
+
+/**
+ * Check if explosions have all been rendered
+ */
+function isExplosionsDone() : boolean
+{
+    return (explosionList.length == 0);
 }
 
 /**
@@ -272,6 +342,11 @@ function keyHandler(keyCode:number, isDown:boolean)
             rightArrowKeyed = isDown;
             break;
         }
+        case CONSTANTS.KEY_SPACEBAR:
+        {
+            atStartScreen = false;
+            break;
+        }
     }
 }
 
@@ -283,12 +358,18 @@ function startGame()
     //set game active
     isGameReady = true;
     
-    //init game state vars
-    timePrevious = Date.now();
+    //reset objects
+    resetObjects();
 
     //create enemies for this level
     loadEnemies();
 
+    //notify user
+    AddGameStartMessage();
+
+    //init game state vars
+    timePrevious = Date.now();
+    
     //start main loop
     main();
 }
@@ -340,12 +421,15 @@ function main() {
         //render rebel projectiles
         Render.drawRebelProjectiles(canvasContext, missileList);
         Render.drawRebelProjectiles(canvasContext, cannonShotList);
-        //render enemey projectiles
+        //render enemy projectiles
         Render.drawEnemyProjectiles(canvasContext, bossList);
         
         //render score
         Render.drawInfoPanel(canvasContext, currentLevel, getRemainingEnemies(), rebelShip.health,
-            missileList);
+            rebelShip.maxHealth, missileList);
+        
+        //render any messages
+        Render.drawMessageList(canvasContext, messageList);
         
         //check if rebel ship has no health
         //then check if enemies left
@@ -355,9 +439,9 @@ function main() {
             isGameReady = false;
             
             //notify user game over
-            Modal.loadGameOverModal(currentUserScore, currentLevel);
+            Modal.loadGameOverModal(currentUserScore, currentLevel, highScoreList);
         }
-        else if(getRemainingEnemies() == 0)
+        else if(getRemainingEnemies() == 0 && isExplosionsDone())
         {
             //game flag to inactive
             isGameReady = false;
@@ -374,20 +458,74 @@ function main() {
     requestAnimationFrame(main);
 };
 
+/**
+ * TITLE SCREEN LOOP
+ */
+function showStartScreen() {
+    //get the current canvas
+    var canvasContext:CanvasRenderingContext2D =  gameCanvas.getContext("2d"); 
+    
+    //clear canvas
+    canvasContext.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
+    
+    //get current time & compare to past time to get delta
+    var currentTime:number = Date.now();
+	var delta:number = (currentTime - timePrevious) / 1000;
+    
+    //move enemy ships
+    Render.moveEnemyShips(delta, currentTime, enemyShipList);
+    
+    //check if no messages
+    if(messageList.length == 0)
+    {
+        AddPressSpacebarMessage(); //add new
+    }
+    
+    //check if no enemies left
+    if(enemyShipList.length == 0)
+    {
+        loadDummyEnemies();
+    }
+    
+    //render title
+    Render.drawTitle(canvasContext);
+    
+    //render any messages
+    Render.drawMessageList(canvasContext, messageList);
+    
+    //render dummy enemies
+    Render.drawDummyShips(canvasContext, currentTime, enemyShipList);
+    
+    //store current time as previous
+    timePrevious = currentTime;
+    
+    //check start screen flag
+    if(!atStartScreen)
+    {
+        //get user input
+        Modal.openWelcomeWindow(highScoreList); 
+    }
+    else
+    {
+        //re-animate
+        requestAnimationFrame(showStartScreen);
+    }
+}
+
 /*** WINDOW MANAGEMENT ***/
 /**
  * Initialize start of game. Stores current user name
  */
-function UserIsReady(currentUserScore:GameObjects.Score, currentLevel:number)
+function UserIsReady()
 {
     //get user input
     var welcomeUserNameTextbox:HTMLInputElement = <HTMLInputElement>window.document.getElementById('welcomeUserName');
-    var name:string = welcomeUserNameTextbox.value;
+    var name:string = welcomeUserNameTextbox.value; //no whitespaces
     
     //init user data obj
     currentLevel = CONSTANTS.DEFAULT_START_LEVEL;
     currentUserScore = new GameObjects.Score(name, currentLevel);
-    currentUserHighScore = new GameObjects.HighScore(name, Modal.getCurrentUserHighScore(name));
+    currentUserScore.highScore = Modal.getCurrentUserHighScore(name);
     
     //close window
     Modal.closeWelcomeWindow();
@@ -412,27 +550,15 @@ function UserContinue()
  * Start game again 
  */
 function UserPlayAgain()
-{
-    var name:string = currentUserScore.name;
-    //init user data obj
-    currentLevel = CONSTANTS.DEFAULT_START_LEVEL;
-    currentUserScore = new GameObjects.Score(name, currentLevel);
-    
-    if(!CONSTANTS.DEBUG_MODE)
+{    
+    //check if high score
+    if(currentUserScore.isHighScore())
     {
-        var oldHighScore:number = Modal.getCurrentUserHighScore(name);
-        if(currentUserScore.currentScore > oldHighScore)
-        {
-            currentUserHighScore = new GameObjects.HighScore(name, currentUserScore.currentScore);
-        }
-        else
-        {
-            currentUserHighScore = new GameObjects.HighScore(name, oldHighScore);
-        }
-    }
-    else
-    {
-        currentUserHighScore = new GameObjects.HighScore(name, currentUserScore.currentScore);
+        //store score
+        Modal.saveCurrentUserHighScore(currentUserScore.name, currentUserScore.currentScore);
+        
+        //adjust current high score
+        currentUserScore.highScore = currentUserScore.currentScore;
     }
     
     //close window
@@ -440,4 +566,43 @@ function UserPlayAgain()
     
     //start over
     startOver();  
+}
+
+function UserQuitLevelComplete()
+{
+    //close window
+    Modal.closeLevelCompleteWindow();
+    
+    //exit
+    UserQuit();
+}
+
+function UserQuitGameOver()
+{
+    //close window
+    Modal.closeGameOverWindow();
+    
+    //exit
+    UserQuit();
+}
+
+/**
+ * Exit to start screen
+ */
+function UserQuit()
+{
+    //check if score is present
+    if(currentUserScore != null)
+    {
+        Modal.processUserScore(currentUserScore, highScoreList);
+    }
+    
+    //flag start screen
+    atStartScreen = true;
+    
+    //reset time var
+    timePrevious = Date.now();
+    
+    //go to title loop
+    showStartScreen();
 }
