@@ -9,12 +9,15 @@ var Constants;
             this.DEFAULT_START_LEVEL = 1;
             this.DEFAULT_HIGH_SCORE_COOKIE_NAME = 'RebelWarsHighScores';
             this.INFO_TEXT_SPACING = 18;
+            this.MAX_HIGH_SCORES = 5;
             //key values
             this.KEY_LEFT = 37;
             this.KEY_UP = 38;
             this.KEY_RIGHT = 39;
             this.KEY_DOWN = 40;
             this.KEY_SPACEBAR = 32;
+            this.KEY_ENTER = 13;
+            this.KEY_S = 83;
             //dimensions
             this.CLIENT_WINDOW_MARGIN = 10;
             this.CANNON_SHOT_RADIUS = 4;

@@ -8,33 +8,66 @@
     <link href='https://fonts.googleapis.com/css?family=Press+Start+2P' rel='stylesheet' type='text/css'>
     <!-- Message Font -->
     <link href='https://fonts.googleapis.com/css?family=Orbitron' rel='stylesheet' type='text/css'>
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon" />
 </head>
 <body>
 
+    <a href="#warningModal" id="warningLink"></a>
     <a href="#welcomeModal" id="welcomeLink"></a>
     <a href="#levelCompleteModal" id="levelCompleteLink"></a>
     <a href="#gameOverModal" id="gameOverLink"></a>
 
+    <div id="warningModal" class="modalDialog Welcome">
+        <div>
+            <a href="#close" id="closeWelcomeLink"></a>
+            <div style="width:100%;">
+                <img src="images\RebelAlliance.png" height="75" width="75" class="centered" />
+            </div>
+            <div style="width:100%;text-align:center;">
+                <h3>INVALID BROWSER</h3>
+            </div>
+            <table>
+                    <tr>
+                        <td>
+                            Please user a different browser for the best gaming experience.
+                            <br/>
+                            <br/>
+                            Optimized for <a href="https://www.google.com/chrome/">Google Chrome</a>
+                        </td>
+                    </tr>
+             </table>
+        </div>
+    </div>
+
     <div id="welcomeModal" class="modalDialog Welcome">
         <div>
             <a href="#close" id="closeWelcomeLink"></a>
-            <h2>WELCOME TO REBEL WARS</h2>
+            <div style="width:100%;">
+                <img src="images\RebelAlliance.png" height="75" width="75" class="centered" />
+            </div>
+            <div style="width:100%;text-align:center;">
+                <h3>WELCOME TO REBEL WARS</h3>
+            </div>
             <table>
                     <tr>
-                        <td>Username?</td>
-                        <td><input type="text" id="welcomeUserName"/></td>
+                        <td>
+                            Username?  
+                            <label style="font-size:small;font-style:italic;">(max 30)</label>
+                        </td>
                     </tr>
                     <tr>
                         <td>
+                            <input type="text" id="welcomeUserName" maxlength="30"/>
                             <input type="button" id="buttonReady" value="Ready"
                                  onclick="javascript:UserIsReady()"/>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <input type="button" id="buttonQuitWelcome" value="Exit"
+                                 onclick="javascript:UserQuitWelcome()"/>
                         </td>
                     </tr>
             </table>
-            <div style="width:100%;">
-                <img src="images\RebelAlliance.png" height="100" width="100" class="centered" />
-            </div>
-            <div id="welcomeHighScoreDiv">
+            <div id="welcomeHighScoreDiv" class="highScore">
             </div>
         </div>
     </div>
@@ -42,7 +75,12 @@
     <div id="levelCompleteModal" class="modalDialog LevelComplete">
         <div>
             <a href="#close" title="Close" class="close" id="closeLevelCompleteLink"></a>
-            <h2>LEVEL COMPLETE</h2>
+            <div style="width:100%;">
+                <img src="images\RebelAlliance.png" height="75" width="75" class="centered" />
+            </div>
+            <div style="width:100%;text-align:center;">
+                <h3>LEVEL COMPLETE</h3>
+            </div>
             <table>
                     <tr>
                         <td>User:</td>
@@ -74,8 +112,7 @@
                         </td>
                     </tr>
             </table>
-            <div style="width:100%;">
-                <img src="images\RebelAlliance.png" height="100" width="100" class="centered" />
+            <div id="levelCompleteHighScoreDiv" class="highScore">
             </div>
         </div>
     </div>
@@ -83,7 +120,12 @@
     <div id="gameOverModal" class="modalDialog LevelComplete">
         <div>
             <a href="#close" title="Close" class="close" id="closeGameOverLink"></a>
-            <h2>GAME OVER</h2>
+            <div style="width:100%;">
+                <img src="images\RebelAlliance.png" height="75" width="75" class="centered" />
+            </div>
+            <div style="width:100%;text-align:center;">
+                <h3>GAME OVER</h3>
+            </div>
             <table>
                     <tr>
                         <td>User:</td>
@@ -115,21 +157,12 @@
                         </td>
                     </tr>
             </table>
-            <div style="width:100%;">
-                <img src="images\RebelAlliance.png" height="100" width="100" class="centered" />
-            </div>
-            <div id="gameOverHighScoreDiv">
+            <div id="gameOverHighScoreDiv" class="highScore">
             </div>
         </div>
     </div>
     
-    <script src="js\Constants.js"></script>
-    <script src="js\Vector.js"></script>
-    <script src="js\GameObjects.js"></script>
-    <script src="js\GameLogic.js"></script>
-    <script src="js\Render.js"></script>
-    <script src="js\Modal.js"></script>
-    <script src="js\Main.js"></script>
+    <script src="js\RebelWars.js"></script>
 
 </body>
 </html>

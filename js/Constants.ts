@@ -6,13 +6,16 @@ module Constants {
         //game mgmt settings
         DEFAULT_START_LEVEL:number = 1;
         DEFAULT_HIGH_SCORE_COOKIE_NAME:string = 'RebelWarsHighScores';
-        INFO_TEXT_SPACING = 18;
+        INFO_TEXT_SPACING:number = 18;
+        MAX_HIGH_SCORES:number = 5;
         //key values
         KEY_LEFT:number = 37;
         KEY_UP:number = 38;
         KEY_RIGHT:number = 39;
         KEY_DOWN:number = 40;
         KEY_SPACEBAR:number = 32;
+        KEY_ENTER:number = 13;
+        KEY_S:number = 83;
         //dimensions
         CLIENT_WINDOW_MARGIN:number = 10;
         CANNON_SHOT_RADIUS:number = 4;

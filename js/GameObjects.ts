@@ -926,7 +926,9 @@ module GameObjects {
         levelFinish:number;
         currentScore:number;
         highScore:number;
-        highScoreDisplayed:boolean;
+        grandMasterScore:number;
+        personalRecordDisplayed:boolean;
+        grandMasterDisplayed:boolean;
         
         constructor(displayName:string, level:number)
         {
@@ -939,7 +941,9 @@ module GameObjects {
             this.gameDate = new Date(Date.now());
             this.currentScore = 0;
             this.highScore = 0;
-            this.highScoreDisplayed = false;
+            this.grandMasterScore = 0;
+            this.personalRecordDisplayed = false;
+            this.grandMasterDisplayed = false;
         }
         
         /**
@@ -966,11 +970,13 @@ module GameObjects {
      * Class to store historical score data
      */
     export class HighScore {
+        displayName:string;
         name:string;
         score:number;
 
-        constructor(name?:string, score?:number)
+        constructor(displayName?:string, name?:string, score?:number)
         {
+            this.displayName = displayName;
             this.name = name;
             this.score = score;
         }

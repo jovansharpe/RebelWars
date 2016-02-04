@@ -344,5 +344,57 @@ var GameLogic;
         list.push(new GameObjects.Message(type, text, font, colorRgb1, colorRgb2, startX, startY));
     }
     GameLogic.addNewMessage = addNewMessage;
+    /**
+     * Check if browser is compliant
+     */
+    function isCompliantBrowser() {
+        var isCompliant = false;
+        var ua = navigator.userAgent;
+        var browserName = navigator.appName;
+        var nVer = navigator.appVersion;
+        var fullVersion = '' + parseFloat(navigator.appVersion);
+        var majorVer = parseInt(navigator.appVersion, 10);
+        var nameOffset, verOffset, ix;
+        //Google Chrome 
+        if ((verOffset = ua.indexOf("Chrome")) != -1) {
+            browserName = "Chrome";
+            fullVersion = ua.substring(verOffset + 7);
+            isCompliant = true;
+        }
+        else if ((verOffset = ua.indexOf("OPR/")) != -1) {
+            browserName = "Opera";
+            fullVersion = ua.substring(verOffset + 4);
+        }
+        else if ((verOffset = ua.indexOf("Opera")) != -1) {
+            browserName = "Opera";
+            fullVersion = ua.substring(verOffset + 6);
+            if ((verOffset = ua.indexOf("Version")) != -1)
+                fullVersion = ua.substring(verOffset + 8);
+        }
+        else if ((verOffset = ua.indexOf("MSIE")) != -1) {
+            browserName = "Microsoft Internet Explorer";
+            fullVersion = ua.substring(verOffset + 5);
+        }
+        else if ((verOffset = ua.indexOf("Safari")) != -1) {
+            browserName = "Safari";
+            fullVersion = ua.substring(verOffset + 7);
+            if ((verOffset = ua.indexOf("Version")) != -1)
+                fullVersion = ua.substring(verOffset + 8);
+        }
+        else if ((verOffset = ua.indexOf("Firefox")) != -1) {
+            browserName = "Firefox";
+            fullVersion = ua.substring(verOffset + 8);
+        }
+        else if ((nameOffset = ua.lastIndexOf(' ') + 1) <
+            (verOffset = ua.lastIndexOf('/'))) {
+            browserName = ua.substring(nameOffset, verOffset);
+            fullVersion = ua.substring(verOffset + 1);
+            if (browserName.toLowerCase() == browserName.toUpperCase()) {
+                browserName = navigator.appName;
+            }
+        }
+        return isCompliant;
+    }
+    GameLogic.isCompliantBrowser = isCompliantBrowser;
 })(GameLogic || (GameLogic = {}));
 //# sourceMappingURL=GameLogic.js.map

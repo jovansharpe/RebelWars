@@ -331,7 +331,8 @@ module Render {
      * Render current Score and Health
      */
     export function drawInfoPanel(canvasContext:CanvasRenderingContext2D, currentLevel:number,
-        enemies:number, rebelShipHealth:number, rebelShipMaxHealth:number, missileList:Array<GameObjects.Projectile>)
+        enemies:number, rebelShipHealth:number, rebelShipMaxHealth:number, missileList:Array<GameObjects.Projectile>,
+        userScore:number)
     {
         if(canvasContext)
         {
@@ -340,6 +341,7 @@ module Render {
             var health:string = "Health: " + rebelShipHealth.toString();
             var missiles:string = "Missiles: " + GameLogic.getProjectilesByStatus(missileList, false).length.toString();
             missiles += " / " + missileList.length;
+            var score:string = "Score: " + userScore.toString();
             
             //Init font/location
             canvasContext.font = "16px 'Press Start 2P'";
@@ -372,13 +374,17 @@ module Render {
             //draw health
             canvasContext.fillText(health, CONSTANTS.INFO_TEXT_SPACING, CONSTANTS.INFO_TEXT_SPACING * 4);
             
+            //draw score
+            canvasContext.fillStyle = CONSTANTS.FILL_WHITE;
+            canvasContext.fillText(score, CONSTANTS.INFO_TEXT_SPACING, CONSTANTS.INFO_TEXT_SPACING * 5);
+            
             //check for a boss
             if(bossList.length > 0)
             {
                 //color & fill boss health
                 canvasContext.fillStyle = CONSTANTS.FILL_ORANGE;
                 canvasContext.fillText("Boss: " + bossList[0].health.toString(), 
-                    CONSTANTS.INFO_TEXT_SPACING, CONSTANTS.INFO_TEXT_SPACING * 5);
+                    CONSTANTS.INFO_TEXT_SPACING, CONSTANTS.INFO_TEXT_SPACING * 6);
             }
             
         }
@@ -521,5 +527,14 @@ module Render {
         canvasContext.font = "80px 'Orbitron'";
         canvasContext.fillStyle = CONSTANTS.FILL_WHITE;
         canvasContext.fillText("REBEL WARS", browserWidth / 2, browserHeight / 4);
+    }
+    
+    export function drawChampion(canvasContext:CanvasRenderingContext2D, text:string)
+    {
+        canvasContext.textAlign = "center";
+        canvasContext.textBaseline = "top";
+        canvasContext.font = "16px 'Press Start 2P'";
+        canvasContext.fillStyle = CONSTANTS.FILL_LIGHT_BLUE;
+        canvasContext.fillText("Grand Master Jedi: " + text, browserWidth / 2, browserHeight / 12);
     }
 }

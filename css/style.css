@@ -17,7 +17,7 @@ img.centered {
 }
 
 #welcomeHighScoreDiv table{
-    width: 80%;
+    width: 100%;
     margin: auto;
 }
 
@@ -38,6 +38,28 @@ img.centered {
     font-weight: lighter;
     font-size: x-small;
     font-style: italic;
+}
+
+.highScore {
+    width: 100%;
+}
+
+.highScoreHeaderRank .highScoreHeaderName {
+    text-align: left;
+    font-weight: bold;
+}
+
+.highScoreHeaderScore {
+    text-align: center;
+    font-weight: bold;
+}
+
+.highScoreDataRank .highScoreDataName {
+    text-align: left;
+}
+
+.highScoreDataScore {
+    text-align: center;
 }
 
 /*********** MODAL WINDOWS STYLING ********************/
@@ -64,7 +86,7 @@ img.centered {
 }
 
 .Welcome > div {
-	width: 350px;
+	width: 400px;
 	position: relative;
 	margin: 10% auto;
 	padding: 5px 20px 13px 20px;
@@ -76,7 +98,7 @@ img.centered {
 }
 
 .LevelComplete > div {
-	width: 250px;
+	width: 400px;
 	position: relative;
 	margin: 10% auto;
 	padding: 5px 20px 13px 20px;

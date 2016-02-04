@@ -687,7 +687,9 @@ var GameObjects;
             this.gameDate = new Date(Date.now());
             this.currentScore = 0;
             this.highScore = 0;
-            this.highScoreDisplayed = false;
+            this.grandMasterScore = 0;
+            this.personalRecordDisplayed = false;
+            this.grandMasterDisplayed = false;
         }
         /**
          * Add to current score
@@ -711,7 +713,8 @@ var GameObjects;
      * Class to store historical score data
      */
     var HighScore = (function () {
-        function HighScore(name, score) {
+        function HighScore(displayName, name, score) {
+            this.displayName = displayName;
             this.name = name;
             this.score = score;
         }

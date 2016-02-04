@@ -436,4 +436,68 @@ module GameLogic {
         list.push(new GameObjects.Message(type, text, font, colorRgb1, colorRgb2, 
             startX, startY));
     }
+    
+    /**
+     * Check if browser is compliant
+     */
+    export function isCompliantBrowser() : boolean
+    {
+        var isCompliant:boolean = false;
+        
+        var ua:string = navigator.userAgent;
+        var browserName:string  = navigator.appName;
+        var nVer:string = navigator.appVersion;
+        var fullVersion:string  = ''+parseFloat(navigator.appVersion); 
+        var majorVer:number = parseInt(navigator.appVersion,10);
+        var nameOffset,verOffset,ix;
+        
+        //Google Chrome 
+        if ((verOffset = ua.indexOf("Chrome")) != -1) 
+        {
+            browserName = "Chrome";
+            fullVersion = ua.substring(verOffset+7);
+            isCompliant = true;
+        }
+        // Opera 15+, 
+        else if ((verOffset=ua.indexOf("OPR/"))!=-1) {
+            browserName = "Opera";
+            fullVersion = ua.substring(verOffset+4);
+        }
+        // older Opera,
+        else if ((verOffset=ua.indexOf("Opera"))!=-1) {
+            browserName = "Opera";
+            fullVersion = ua.substring(verOffset+6);
+            if ((verOffset=ua.indexOf("Version"))!=-1) 
+            fullVersion = ua.substring(verOffset+8);
+        }
+        // Microsoft IE
+        else if ((verOffset=ua.indexOf("MSIE"))!=-1) {
+            browserName = "Microsoft Internet Explorer";
+            fullVersion = ua.substring(verOffset+5);
+        }
+        //Apple Safari 
+        else if ((verOffset=ua.indexOf("Safari"))!=-1) {
+            browserName = "Safari";
+            fullVersion = ua.substring(verOffset+7);
+            if ((verOffset=ua.indexOf("Version"))!=-1) 
+            fullVersion = ua.substring(verOffset+8);
+        }
+        //Firefox 
+        else if ((verOffset=ua.indexOf("Firefox"))!=-1) {
+            browserName = "Firefox";
+            fullVersion = ua.substring(verOffset+8);
+        }
+        //other browsers 
+        else if ( (nameOffset=ua.lastIndexOf(' ')+1) < 
+                (verOffset=ua.lastIndexOf('/')) ) 
+        {
+            browserName = ua.substring(nameOffset,verOffset);
+            fullVersion = ua.substring(verOffset+1);
+            if (browserName.toLowerCase()==browserName.toUpperCase()) {
+                browserName = navigator.appName;
+            }
+        }
+
+        return isCompliant;
+    }
 }

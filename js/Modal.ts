@@ -18,14 +18,17 @@ module Modal {
         scoreLabel.textContent = currentUserScore.currentScore.toString();
         
         //check for high score
-        if(currentUserScore.isHighScore() && !currentUserScore.highScoreDisplayed)
+        if(currentUserScore.isHighScore() && !currentUserScore.personalRecordDisplayed)
         {
             //notify user
-            AddHighScoreMessage();
+            AddPersonalRecordMessage();
             
             //flag that user has been notified
-            currentUserScore.highScoreDisplayed = true;
+            currentUserScore.personalRecordDisplayed = true;
         }
+        
+        //process score
+        checkUserScore(currentUserScore, "levelCompleteHighScoreDiv");
         
         //open window
         openLevelCompleteWindow(); 
@@ -81,9 +84,9 @@ module Modal {
     {
         //create new object
         var defaultHighScoreList:Array<GameObjects.HighScore> = new Array<GameObjects.HighScore>();
-        defaultHighScoreList.push(new GameObjects.HighScore('Player 1',5));
-        defaultHighScoreList.push(new GameObjects.HighScore('Player 2',20));
-        defaultHighScoreList.push(new GameObjects.HighScore('Player 3',15));
+        defaultHighScoreList.push(new GameObjects.HighScore('Player 1','Player1',5));
+        defaultHighScoreList.push(new GameObjects.HighScore('Player 2','Player1',20));
+        defaultHighScoreList.push(new GameObjects.HighScore('Player 3','Player1',15));
         //store
         setHighScoreData(defaultHighScoreList);
     }
@@ -118,11 +121,20 @@ module Modal {
     }
 
     /**
+     * Open Warning Window
+     */
+    export function openWarningWindow()
+    {
+        var link:HTMLLinkElement = <HTMLLinkElement>window.document.getElementById('warningLink');
+        link.click();
+    }
+    
+    /**
      * Open Welcome Window
      */
-    export function openWelcomeWindow(list:Array<GameObjects.HighScore>)
+    export function openWelcomeWindow()
     {
-        populateHighScoreListObject(list);
+        var list:Array<GameObjects.HighScore> = populateHighScoreListObject();
         
         displayHighScoreData(list, "welcomeHighScoreDiv");
         
@@ -147,8 +159,9 @@ module Modal {
             var titleRow:HTMLTableRowElement = <HTMLTableRowElement>document.createElement("tr");
             //create cells
             var titleCell:HTMLTableCellElement = <HTMLTableCellElement>document.createElement("td");
-            titleCell.colSpan = 2;
-            titleCell.align = "center";
+            titleCell.colSpan = 3;
+            //titleCell.align = "center";
+            titleCell.classList.add("highScoreTableHeader");
             //create text
             var titleText:Text = <Text>document.createTextNode("HIGH SCORES");
             //add to table
@@ -159,17 +172,25 @@ module Modal {
             //create row
             var headerRow:HTMLTableRowElement = <HTMLTableRowElement>document.createElement("tr");
             //create cells
+            var headerCellRank:HTMLTableCellElement = <HTMLTableCellElement>document.createElement("td");
+            //headerCellRank.align = "left";
+            headerCellRank.classList.add("highScoreHeaderRank");
             var headerCellName:HTMLTableCellElement = <HTMLTableCellElement>document.createElement("td");
-            headerCellName.align = "left";
+            //headerCellName.align = "left";
+            headerCellName.classList.add("highScoreHeaderName");
             var headerCellScore:HTMLTableCellElement = <HTMLTableCellElement>document.createElement("td");
-            headerCellScore.align = "left";
+            //headerCellScore.align = "left";
+            headerCellName.classList.add("highScoreHeaderScore");
             //create text
+            var headerRankText:Text = <Text>document.createTextNode("RANK");
             var headerNameText:Text = <Text>document.createTextNode("NAME");
             var headerScoreText:Text = <Text>document.createTextNode("SCORE");
             
             //add to table
+            headerCellRank.appendChild(headerRankText);
             headerCellName.appendChild(headerNameText);
             headerCellScore.appendChild(headerScoreText);
+            headerRow.appendChild(headerCellRank);
             headerRow.appendChild(headerCellName);
             headerRow.appendChild(headerCellScore);
             table.appendChild(headerRow);
@@ -179,16 +200,24 @@ module Modal {
                 //create row
                 var newRow:HTMLTableRowElement = <HTMLTableRowElement>document.createElement("tr");
                 //create cells
+                var rankCell:HTMLTableCellElement = <HTMLTableCellElement>document.createElement("td");
+                //rankCell.align = "left";
+                rankCell.classList.add("highScoreDataRank");
                 var nameCell:HTMLTableCellElement = <HTMLTableCellElement>document.createElement("td");
-                nameCell.align = "left";
+                //nameCell.align = "left";
+                nameCell.classList.add("highScoreDataName");
                 var scoreCell:HTMLTableCellElement = <HTMLTableCellElement>document.createElement("td");
-                scoreCell.align = "center";
+                //scoreCell.align = "center";
+                scoreCell.classList.add("highScoreDataScore");
                 //create text
-                var nameText:Text = <Text>document.createTextNode(list[i].name);
+                var rankText:Text = <Text>document.createTextNode(getRank(i));
+                var nameText:Text = <Text>document.createTextNode(list[i].displayName);
                 var scoreText:Text = <Text>document.createTextNode(list[i].score.toString());
                 
+                rankCell.appendChild(rankText);
                 nameCell.appendChild(nameText);
                 scoreCell.appendChild(scoreText);
+                newRow.appendChild(rankCell);
                 newRow.appendChild(nameCell);
                 newRow.appendChild(scoreCell);
 
@@ -205,99 +234,137 @@ module Modal {
     }
     
     /**
-     * Retrieve previous high scores among all users
+     * Return named Jedi rank based on position number
      */
-    function populateHighScoreListObject(list:Array<GameObjects.HighScore>)
+    function getRank(position:number) : string
     {
-        var maxItems:number = 3;
-        
-        //wipe list
-        list.splice(0);
-        
-        //get high score data
-        var values = getHighScoreData();
-        
-        //ensure not null
-        if(values != null)
+        switch(position)
         {
-            //sort from highest to lowest, returns list of keys
-            var keysSorted = Object.keys(values).sort(function(a,b){return values[a].score-values[b].score}).reverse();
-            //limit scores
-            var max:number = keysSorted.length;
-            if(max > maxItems) { max = maxItems; }
-            var name:string;
-            var score:number;
-            //use keys to populate global object
-            for(var i = 0; i < max; i++)
-            {
-                name = values[keysSorted[i]].name;
-                score = values[keysSorted[i]].score;
-                
-                if(name != null && score != null)
-                {
-                    list.push(new GameObjects.HighScore(name,score));
-                }
-            }
-            
-            if(list.length > maxItems)
-            {
-                list.splice((maxItems));
-            }
-        }
-        else
-        {
-            setDefaultHighScoreData();
+            case 0:
+                return "Grand Master";
+                break;
+            case 1:
+                return "Master";
+                break;
+            case 2:
+                return "Knight";
+                break;
+            case 3:
+                return "Apprentice";
+                break;
+            case 4:
+                return "Padawan";
+                break;
+            default:
+                return "Youngling";
         }
     }
     
     /**
+     * Retrieve previous high scores among all users
+     */
+    function populateHighScoreListObject() : Array<GameObjects.HighScore>
+    {
+        var maxItems:number = CONSTANTS.MAX_HIGH_SCORES;
+        
+        //get high score list
+        return Service.getHighScoreList(maxItems);
+    }
+    
+    /**
+     * Retrieve previous high scores among all users
+     */
+    // function populateHighScoreListObject(list:Array<GameObjects.HighScore>)
+    // {
+    //     var maxItems:number = CONSTANTS.MAX_HIGH_SCORES;
+    //     
+    //     //wipe list
+    //     list.splice(0);
+    //     
+    //     //get high score data
+    //     var values = getHighScoreData();
+    //     
+    //     //ensure not null
+    //     if(values != null)
+    //     {
+    //         //sort from highest to lowest, returns list of keys
+    //         var keysSorted = Object.keys(values).sort(function(a,b){return values[a].score-values[b].score}).reverse();
+    //         //limit scores
+    //         var max:number = keysSorted.length;
+    //         if(max > maxItems) { max = maxItems; }
+    //         var name:string;
+    //         var score:number;
+    //         //use keys to populate global object
+    //         for(var i = 0; i < max; i++)
+    //         {
+    //             name = values[keysSorted[i]].name;
+    //             score = values[keysSorted[i]].score;
+    //             
+    //             if(name != null && score != null)
+    //             {
+    //                 list.push(new GameObjects.HighScore(name,score));
+    //             }
+    //         }
+    //         
+    //         if(list.length > maxItems)
+    //         {
+    //             list.splice((maxItems));
+    //         }
+    //     }
+    //     else
+    //     {
+    //         setDefaultHighScoreData();
+    //     }
+    // }
+    
+    /**
      * Compare current user score against high score list to see if it needs to be added
      */
-    function compareScoreAgainstOtherUsers(userName:string, userScore:number, list:Array<GameObjects.HighScore>)
-    {
-        var hasChanged:boolean = false;
-        
-        //check if list is small / non-existent
-        if(list.length < 3)
-        {
-            //just add
-            list.push(new GameObjects.HighScore(userName, userScore));
-            //flag change
-            hasChanged = true;
-        }
-        else
-        {
-            //loop through list
-            //should be sorted from highest to lowest
-            for(var i = 0; i < list.length; i++)
-            {
-                //check if user exceeded this score
-                if(!hasChanged && userScore > list[i].score)
-                {
-                    //insert
-                    list.splice(i, 0, new GameObjects.HighScore(userName, userScore));
-                    //flag change
-                    hasChanged = true;
-                    break;
-                }
-            }
-        }
-        
-        //check if list has changed
-        if(hasChanged)
-        {
-            //store
-            setHighScoreData(list);
-            
-            //populate again to sort
-            populateHighScoreListObject(list);
-        }
-    }
+    // function compareScoreAgainstOtherUsers(userName:string, userScore:number, list:Array<GameObjects.HighScore>)
+    // {
+    //     var hasChanged:boolean = false;
+    //     
+    //     //check if list is small / non-existent
+    //     if(list.length < 3)
+    //     {
+    //         //just add
+    //         list.push(new GameObjects.HighScore(userName, userName.replace(' ',''), userScore));
+    //         //flag change
+    //         hasChanged = true;
+    //     }
+    //     else
+    //     {
+    //         //loop through list
+    //         //should be sorted from highest to lowest
+    //         for(var i = 0; i < list.length; i++)
+    //         {
+    //             //check if user exceeded this score
+    //             if(!hasChanged && userScore > list[i].score)
+    //             {
+    //                 //insert
+    //                 list.splice(i, 0, new GameObjects.HighScore(userName, userName.replace(' ',''), userScore));
+    //                 //flag change
+    //                 hasChanged = true;
+    //                 break;
+    //             }
+    //         }
+    //     }
+    //     
+    //     //check if list has changed
+    //     if(hasChanged)
+    //     {
+    //         //store
+    //         setHighScoreData(list);
+    //         
+    //         //populate again to sort
+    //         list = populateHighScoreListObject();
+    //     }
+    // }
 
     /**
      * Load Modal that notifies user that the level is complete
      */
-    export function loadGameOverModal(currentUserScore:GameObjects.Score, currentLevel:number, list:Array<GameObjects.HighScore>)
+    export function loadGameOverModal(currentUserScore:GameObjects.Score, currentLevel:number)
     {
         //get page items
         var userNameLabel:HTMLLabelElement = <HTMLLabelElement>window.document.getElementById('gameOverUserName');
@@ -312,26 +379,45 @@ module Modal {
         //store final stats
         currentUserScore.levelFinish = currentLevel;
         
-        processUserScore(currentUserScore, list);
-        
-        //show updated high score list
-        displayHighScoreData(list, "gameOverHighScoreDiv");
+        //process score
+        checkUserScore(currentUserScore, "gameOverHighScoreDiv");
         
         //open window
         openGameOverWindow(); 
     }
 
-    export function processUserScore(score:GameObjects.Score, list:Array<GameObjects.HighScore>)
+    /**
+     * Check if user has a high score
+     */
+    export function checkUserScoreOnQuit(score:GameObjects.Score)
+    {
+        checkUserScore(score, null);
+    }
+
+    /**
+     * Check if user has a high score
+     */
+    export function checkUserScore(score:GameObjects.Score, divName:string)
     {
         //check score
         if(score.isHighScore())
         {
             //store if personal record
-            saveCurrentUserHighScore(score.name, score.currentScore);
+            saveCurrentUserHighScore(score);
+        }
+        
+        //check if needing to populate div
+        if(divName != null)
+        {
+            //get high score list
+            var list:Array<GameObjects.HighScore> = populateHighScoreListObject();
+            
+            //show updated high score list
+            displayHighScoreData(list, divName);
         }
         
         //compare score against other high scores
-        compareScoreAgainstOtherUsers(score.name, score.currentScore, list);
+        //compareScoreAgainstOtherUsers(score.name, score.currentScore, list);
     }
 
     /**
@@ -341,7 +427,9 @@ module Modal {
     {
         var score:number = 0;
         
-        score = Number(getCurrentUserHighScoreData(name));
+        //score = Number(getCurrentUserHighScoreData(name));
+        
+        score = Number(Service.getHighScore(name));
         
         return score;
     }
@@ -349,10 +437,12 @@ module Modal {
     /**
      * Save high score for a specific user
      */
-    export function saveCurrentUserHighScore(name:string, score:number) : void
+    export function saveCurrentUserHighScore(score:GameObjects.Score) : void
     {
         //save
-        saveCurrentUserData(name, score);
+        Service.setHighScore(score);
+        
+        //saveCurrentUserData(name, score);
     }
 
     export function closeWelcomeWindow()

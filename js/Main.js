@@ -58,22 +58,30 @@ var timePrevious = Date.now();
 var titleTimePrevious = 0;
 //init user stats
 var currentUserScore = new GameObjects.Score("Anonymous", CONSTANTS.DEFAULT_START_LEVEL);
-var highScoreList = new Array();
+//var highScoreList:Array<GameObjects.HighScore> = new Array<GameObjects.HighScore>();
+var champion = Service.getChampion();
 //init theme song
 var titleThemeSong = new Audio("sounds/MainThemeWhistle.mp3");
 titleThemeSong.loop = true;
-//check if start screen showing
-if (atStartScreen) {
-    //reset time
-    titleTimePrevious = Date.now();
-    //start song
-    titleThemeSong.play();
-    //run title screen
-    showStartScreen();
+//check browser
+if (GameLogic.isCompliantBrowser()) {
+    //check if start screen showing
+    if (atStartScreen) {
+        //reset time
+        titleTimePrevious = Date.now();
+        //start song
+        titleThemeSong.play();
+        //run title screen
+        showStartScreen();
+    }
+    else {
+        //get user input
+        Modal.openWelcomeWindow();
+    }
 }
 else {
-    //get user input
-    Modal.openWelcomeWindow(highScoreList);
+    //open warning
+    Modal.openWarningWindow();
 }
 /*** GAME FUNCTIONS ***/
 /**
@@ -169,13 +177,19 @@ function AddBossMessage() {
     //add message
     GameLogic.addNewMessage(messageList, Constants.MessageType.NEW_BOSS, "^^^ BOSS DETECTED ^^^", GetMessageLocationX(), GetMessageLocationY(), 32);
 }
-function AddHighScoreMessage() {
+function AddPersonalRecordMessage() {
     //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.NEW_BOSS, "*** HIGH SCORE ***", GetMessageLocationX(), GetMessageLocationY(), 32);
+    GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "*** PERSONAL RECORD ***", GetMessageLocationX(), GetMessageLocationY(), 32);
 }
 function AddPressSpacebarMessage() {
     //add message
     GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "*** PRESS SPACEBAR TO START ***", GetMessageLocationX(), GetMessageLocationY(), 32);
+}
+function AddNewHighScoreMessage() {
+    //add message
+    GameLogic.addNewMessage(messageList, Constants.MessageType.HIGH_SCORE, "!!! NEW HIGH SCORE !!!", GetMessageLocationX(), GetMessageLocationY(), 40);
+    //add message
+    GameLogic.addNewMessage(messageList, Constants.MessageType.HIGH_SCORE, "### JEDI GRAND MASTER ###", GetMessageLocationX(), GetMessageLocationY(), 40);
 }
 /**
  * Get amount of enemy ships remaining
@@ -207,20 +221,19 @@ function rebelShipUserInput(modifier) {
  * User presses key down
  */
 function keyDownHandler(event) {
-    var keyCode = event.keyCode || event.which;
-    keyHandler(keyCode, true);
+    keyHandler(true, event);
 }
 /**
  * User lets up on key
  */
 function keyUpHandler(event) {
-    var keyCode = event.keyCode || event.which;
-    keyHandler(keyCode, false);
+    keyHandler(false, event);
 }
 /**
  * Generic key handler
  */
-function keyHandler(keyCode, isDown) {
+function keyHandler(isDown, event) {
+    var keyCode = event.keyCode || event.which;
     switch (keyCode) {
         case CONSTANTS.KEY_UP:
             {
@@ -248,12 +261,21 @@ function keyHandler(keyCode, isDown) {
                 rightArrowKeyed = isDown;
                 break;
             }
+        case CONSTANTS.KEY_ENTER:
         case CONSTANTS.KEY_SPACEBAR:
             {
-                atStartScreen = false;
-                titleThemeSong.currentTime = 0;
-                titleThemeSong.pause();
-                break;
+                //check if in game
+                if (isGameReady) {
+                    //ensure these keys do not reset screen
+                    event.cancelBubble = true;
+                    event.returnValue = false;
+                }
+                else if (atStartScreen) {
+                    //if at start screen, disable
+                    atStartScreen = false;
+                    titleThemeSong.currentTime = 0;
+                    titleThemeSong.pause();
+                }
             }
     }
 }
@@ -313,7 +335,7 @@ function main() {
         //render enemy projectiles
         Render.drawEnemyProjectiles(canvasContext, bossList);
         //render score
-        Render.drawInfoPanel(canvasContext, currentLevel, getRemainingEnemies(), rebelShip.health, rebelShip.maxHealth, missileList);
+        Render.drawInfoPanel(canvasContext, currentLevel, getRemainingEnemies(), rebelShip.health, rebelShip.maxHealth, missileList, currentUserScore.currentScore);
         //render any messages
         Render.drawMessageList(canvasContext, messageList);
         //check if rebel ship has no health
@@ -322,7 +344,7 @@ function main() {
             //game flag to inactive
             isGameReady = false;
             //notify user game over
-            Modal.loadGameOverModal(currentUserScore, currentLevel, highScoreList);
+            Modal.loadGameOverModal(currentUserScore, currentLevel);
         }
         else if (getRemainingEnemies() == 0 && isExplosionsDone()) {
             //game flag to inactive
@@ -360,6 +382,8 @@ function showStartScreen() {
     }
     //render title
     Render.drawTitle(canvasContext);
+    //render high score
+    Render.drawChampion(canvasContext, champion);
     //render any messages
     Render.drawMessageList(canvasContext, messageList);
     //render dummy enemies
@@ -369,7 +393,7 @@ function showStartScreen() {
     //check start screen flag
     if (!atStartScreen) {
         //get user input
-        Modal.openWelcomeWindow(highScoreList);
+        Modal.openWelcomeWindow();
     }
     else {
         //re-animate
@@ -409,7 +433,7 @@ function UserPlayAgain() {
     //check if high score
     if (currentUserScore.isHighScore()) {
         //store score
-        Modal.saveCurrentUserHighScore(currentUserScore.name, currentUserScore.currentScore);
+        Modal.saveCurrentUserHighScore(currentUserScore);
         //adjust current high score
         currentUserScore.highScore = currentUserScore.currentScore;
     }
@@ -417,6 +441,14 @@ function UserPlayAgain() {
     Modal.closeGameOverWindow();
     //start over
     startOver();
+}
+function UserQuitWelcome() {
+    //close window
+    Modal.closeWelcomeWindow();
+    //erase score
+    currentUserScore = null;
+    //exit
+    UserQuit();
 }
 function UserQuitLevelComplete() {
     //close window
@@ -436,8 +468,10 @@ function UserQuitGameOver() {
 function UserQuit() {
     //check if score is present
     if (currentUserScore != null) {
-        Modal.processUserScore(currentUserScore, highScoreList);
+        Modal.checkUserScoreOnQuit(currentUserScore);
     }
+    //reset champion
+    champion = Service.getChampion();
     //flag start screen
     atStartScreen = true;
     //reset time var
