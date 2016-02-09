@@ -7,8 +7,10 @@ module GameObjects {
     var isDestroyerLoaded:boolean = false;
     var isCommanderLoaded:boolean = false;
     var isDeathStarLoaded:boolean = false;
+    var isBountyHunterLoaded:boolean = false;
     var isExplosionSmallLoaded:boolean = false;
     var isExplosionLargeLoaded:boolean = false;
+    var isInstructionPanelLoaded:boolean = false;
 
     /**
      * Check if a specific ship types image has been loaded already
@@ -34,6 +36,9 @@ module GameObjects {
             case Constants.ShipType.EMPIRE_DEATH_STAR:
                 loaded = isDeathStarLoaded;
             break;
+            case Constants.ShipType.BOUNTY_HUNTER:
+                loaded = isBountyHunterLoaded;
+            break;
         }
         
         return loaded;
@@ -54,6 +59,9 @@ module GameObjects {
             case Constants.SpriteType.EXPLOSION_LARGE:
                 loaded = isExplosionLargeLoaded;
             break;
+            case Constants.SpriteType.INSTRUCTION_PANEL:
+                loaded = isInstructionPanelLoaded;
+            break;
         }
         
         return loaded;
@@ -69,13 +77,17 @@ module GameObjects {
         locationY:number;
         maxHeight:number;
         
-        constructor(currentX:number, currentY:number, canvasWidth: number, canvasHeight: number, speed: number)
+        constructor(currentX:number, currentY:number, canvasWidth: number, canvasHeight: number, speed: number,
+            level:number)
         {
             this.speed = speed;
             this.maxHeight = canvasHeight;
             this.maxWidth = canvasWidth;
             this.locationX = currentX;
             this.locationY = currentY;
+            
+            //adjust object speed
+            this.setSpeedBasedOnLevel(level);
         }
         
         /**
@@ -93,6 +105,17 @@ module GameObjects {
         {
             this.locationY = this.locationY + (pixels * this.speed);
         }
+        
+        /**
+         * Adjust object speed based on level
+         */
+        setSpeedBasedOnLevel(level:number)
+        {
+            //get difficulty factor
+            var factor:number = GameLogic.getDifficultyFactor(level);
+            //add to speed of ship    
+            this.speed += (this.speed * (1/4) * factor);
+        }
     }
 
     /**
@@ -106,13 +129,14 @@ module GameObjects {
         type:Constants.ShipType;
         heightHitFactor:number;
         direction:Constants.Direction;
+        onScreen:boolean;
         
         constructor(currentX:number, currentY:number, canvasWidth: number, 
             canvasHeight: number, speed:number, type:Constants.ShipType, 
-            createDate:Date, health:number, heightHitFactor:number)
+            createDate:Date, health:number, heightHitFactor:number, level:number)
         {
             //base constructor
-            super(currentX, currentY, canvasWidth, canvasHeight, speed);
+            super(currentX, currentY, canvasWidth, canvasHeight, speed, level);
             
             //assign
             this.type = type;
@@ -120,6 +144,9 @@ module GameObjects {
             this.maxHealth = health;
             this.startDate = createDate;
             this.heightHitFactor = heightHitFactor;
+            
+            //default
+            this.onScreen = false;
         }
         
         /**
@@ -256,13 +283,34 @@ module GameObjects {
             
             this.locationY = this.locationY + step;
         }
+        
+        showEntryMessage() : boolean
+        {
+            var showMessage:boolean = false;
+            
+            if(!this.onScreen)
+            {
+                this.onScreen = true;
+                
+                switch(this.type)
+                {
+                    case Constants.ShipType.BOUNTY_HUNTER:
+                    case Constants.ShipType.EMPIRE_COMMANDER:
+                    case Constants.ShipType.EMPIRE_DESTROYER:
+                        showMessage = true;
+                    break;
+                }
+            }
+            
+            return showMessage;
+        }
     }
 
     /**
      * User controlled Rebel Ship
      */
     export class RebelShipObject extends ShipObject {
-        constructor(canvasWidth: number, canvasHeight: number)
+        constructor(canvasWidth: number, canvasHeight: number, level:number)
         {
             //create & assign image
             var image:HTMLImageElement = new Image();
@@ -279,7 +327,8 @@ module GameObjects {
             //base constructor
             super(currentX, currentY, canvasWidth, canvasHeight, 
                 CONSTANTS.REBEL_SHIP_SPEED, Constants.ShipType.REBEL_MILLENIUM_FALCON,
-                new Date(Date.now()), CONSTANTS.REBEL_SHIP_HEALTH, CONSTANTS.REBEL_SHIP_HEIGHT_HIT_FACTOR);
+                new Date(Date.now()), CONSTANTS.REBEL_SHIP_HEALTH, CONSTANTS.REBEL_SHIP_HEIGHT_HIT_FACTOR,
+                level);
         }
         
         /**
@@ -323,17 +372,32 @@ module GameObjects {
      * Fighter class enemy ship
      */
     export class TieFighterObject extends ShipObject {
-        constructor(currentX:number, currentY:number, canvasWidth: number, canvasHeight: number, startTime:Date)
+        constructor(currentX:number, currentY:number, canvasWidth: number, canvasHeight: number, startTime:Date,
+            level:number)
         {
             //base constructor
             super(currentX, currentY, canvasWidth, canvasHeight, 
                 CONSTANTS.TIE_FIGHTER_SPEED, Constants.ShipType.EMPIRE_TIE_FIGHTER, 
-                startTime, CONSTANTS.TIE_FIGHTER_HEALTH, CONSTANTS.TIE_FIGHTER_HEIGHT_HIT_FACTOR);
+                startTime, CONSTANTS.TIE_FIGHTER_HEALTH, CONSTANTS.TIE_FIGHTER_HEIGHT_HIT_FACTOR,
+                level);
             //create & assign image
             var image:HTMLImageElement = new Image();
             image.src = 'images/TieFighter3.png';
             image.onload = function(){ isTieFighterLoaded = true; }
             this.objImage = image;
+            
+            this.setStatsBasedOnDifficulty(level);
+        }
+        
+        /**
+         * Adjust ship properties based on current level. 
+         */
+        setStatsBasedOnDifficulty(level:number)
+        {
+            //get difficulty factor
+            var factor:number = GameLogic.getDifficultyFactor(level);
+            //add to health of ship
+            this.health = this.maxHealth = (this.maxHealth + factor);
         }
     }
 
@@ -341,18 +405,30 @@ module GameObjects {
      * Destroyer class enemy ship
      */
     export class DestroyerObject extends ShipObject {
-        constructor(currentX:number, currentY:number, canvasWidth: number, canvasHeight: number, startTime:Date)
+        constructor(currentX:number, currentY:number, canvasWidth: number, canvasHeight: number, startTime:Date,
+            level:number)
         {
             //base constructor
             super(currentX, currentY, canvasWidth, canvasHeight, 
                 CONSTANTS.DESTROYER_SPEED, Constants.ShipType.EMPIRE_DESTROYER, 
-                startTime, CONSTANTS.DESTROYER_HEALTH,
-                CONSTANTS.DESTROYER_HEIGHT_HIT_FACTOR);
+                startTime, CONSTANTS.DESTROYER_HEALTH, CONSTANTS.DESTROYER_HEIGHT_HIT_FACTOR,
+                level);
             //create & assign image
             var image:HTMLImageElement = new Image();
             image.src = 'images/Destroyer3.png';
             image.onload = function(){ isDestroyerLoaded = true; }
             this.objImage = image;
+        }
+        
+        /**
+         * Adjust ship properties based on current level. 
+         */
+        setStatsBasedOnDifficulty(level:number)
+        {
+            //get difficulty factor
+            var factor:number = GameLogic.getDifficultyFactor(level);
+            //add to health of ship
+            this.health = this.maxHealth = (this.maxHealth + (factor * 2));
         }
     }
 
@@ -362,28 +438,50 @@ module GameObjects {
     export class BossShipObject extends ShipObject {
         nextWaypoint:Vector.Waypoint;
         cannonShotList:Array<Projectile>;
+        cannonShotType:Constants.ProjectileType;
+        cannonShotSpeed:number;
+        cannonShotFireRate:number;
+        cannonShotLimit:number;
+        numberOfExtraShots:number;
         missileList:Array<Projectile>;
-        fireRateShots:number;
-        fireRateMissiles:number;
+        missileType:Constants.ProjectileType;
+        missileSpeed:number;
+        missileFireRate:number;
+        missileLimit:number;
         nextFireTimeShot:Date;
         nextFireTimeMissile:Date;
         isTargetingShots:boolean;
         isTargetingMissiles:boolean;
         
+        
         constructor(currentX:number, currentY:number, canvasWidth: number, canvasHeight: number, 
             speed:number, type:Constants.ShipType, startTime:Date, health:number, heightHitFactor:number,
-            numberOfShots:number, fireRateShots:number, fireRateMissiles:number)
+            cannonShotType:Constants.ProjectileType, cannonShotSpeed:number, cannonShotFireRate:number, cannonShotLimit:number, 
+            numberOfExtraShots:number, missileType:Constants.ProjectileType, missileSpeed:number, missileFireRate:number, missileLimit:number,
+            level:number)
         {
             //base constructor
             //cut height in half
             super(currentX, currentY, canvasWidth, canvasHeight, 
-                speed, type, startTime, health, heightHitFactor);
+                speed, type, startTime, health, heightHitFactor, level);
             
-            //set fire rate
-            this.fireRateShots = fireRateShots;
-            this.fireRateMissiles = fireRateMissiles;
+            //set cannon specs
+            this.cannonShotType = cannonShotType;
+            this.cannonShotSpeed = cannonShotSpeed;
+            this.cannonShotFireRate = cannonShotFireRate;
+            this.cannonShotLimit = cannonShotLimit;
+            this.numberOfExtraShots = numberOfExtraShots;
             this.nextFireTimeShot = this.getNextFireDate(Date.now(), Constants.ProjectileType.IMPERIAL_SHOT);
+            
+            //set missile specs
+            this.missileType = missileType;
+            this.missileSpeed = missileSpeed;
+            this.missileFireRate = missileFireRate;
+            this.missileLimit = missileLimit;            
             this.nextFireTimeMissile = this.getNextFireDate(Date.now(), Constants.ProjectileType.IMPERIAL_MISSILE);
+            
+            //set difficultyLevel
+            this.setStatsBasedOnDifficulty(level);            
         }
         
         /**
@@ -446,6 +544,21 @@ module GameObjects {
         }
         
         /**
+         * Retrieve number of additional projectiles to create per round
+         */
+        getNumberOfExtraShots()
+        {
+            if(this.numberOfExtraShots != null)
+            {
+                return this.numberOfExtraShots;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        
+        /**
          * Check if a specific type of projectile is targeting player
          */
         isTargeting(type:Constants.ProjectileType) : boolean
@@ -498,10 +611,10 @@ module GameObjects {
             switch(type)
             {
                 case Constants.ProjectileType.IMPERIAL_MISSILE:
-                    seconds = this.fireRateMissiles;
+                    seconds = this.missileFireRate;
                 break;
                 default:
-                    seconds = this.fireRateShots;
+                    seconds = this.cannonShotFireRate;
                 break;
             }
             
@@ -549,28 +662,66 @@ module GameObjects {
                 return false;
             }
         }
+        
+        /**
+         * Check if projectile type shoots multiple times per round
+         */
+        isMultiShot(type:Constants.ProjectileType): boolean
+        {
+            switch(type)
+            {
+                case Constants.ProjectileType.TURRET_SPRAY:
+                case Constants.ProjectileType.IMPERIAL_SHOT:
+                    return true;
+                break;
+                default:
+                    return false;
+                break;
+            }
+        }
+        
+        /**
+         * Adjust ship properties based on current level. 
+         */
+        setStatsBasedOnDifficulty(level:number)
+        {
+            //get difficulty factor
+            var factor:number = GameLogic.getDifficultyFactor(level);
+            //add to health of ship
+            this.health = this.maxHealth = (this.maxHealth + (this.maxHealth * (1/5) * factor));
+            //add to speed of cannon
+            this.cannonShotSpeed += (this.cannonShotSpeed * (1/4) * factor);
+            //increase cannon fire rate
+            this.cannonShotFireRate += (this.cannonShotFireRate * (1/4) * factor);
+            //add to speed of missile
+            this.missileSpeed += (this.missileSpeed * (1/4) * factor);
+            //increase missile fire rate
+            this.missileFireRate += (this.missileFireRate * (1/4) * factor);
+        }
     }
 
     /**
      * Command class enemy ship
      */
     export class CommanderObject extends BossShipObject {
-        constructor(currentX:number, currentY:number, canvasWidth: number, canvasHeight: number, startTime:Date)
+        constructor(currentX:number, currentY:number, canvasWidth: number, canvasHeight: number, startTime:Date,
+            level:number)
         {
             //base constructor
             super(currentX, currentY, canvasWidth, canvasHeight, 
                 CONSTANTS.COMMANDER_SPEED, Constants.ShipType.EMPIRE_COMMANDER, 
                 startTime, CONSTANTS.COMMANDER_HEALTH, CONSTANTS.COMMANDER_HEIGHT_HIT_FACTOR,
-                CONSTANTS.COMMANDER_IMPERIAL_SHOT_LIMIT, CONSTANTS.COMMANDER_IMPERIAL_SHOT_FIRE_RATE, 0);
+                Constants.ProjectileType.IMPERIAL_SHOT, CONSTANTS.IMPERIAL_SHOT_SPEED, 
+                CONSTANTS.COMMANDER_IMPERIAL_SHOT_FIRE_RATE, CONSTANTS.COMMANDER_IMPERIAL_SHOT_LIMIT,
+                0, null, 0, 0, 0, level);
             //create & assign image
             var image:HTMLImageElement = new Image();
             image.src = 'images/Commander2.png';
             image.onload = function(){ isCommanderLoaded = true; }
             this.objImage = image;
             //populate projectile list
-            this.cannonShotList = GameLogic.getPopulatedProjectileList(Constants.ProjectileType.IMPERIAL_SHOT,
-                CONSTANTS.IMPERIAL_SHOT_SPEED, CONSTANTS.COMMANDER_IMPERIAL_SHOT_LIMIT, canvasWidth,
-                canvasHeight);
+            this.cannonShotList = GameLogic.getPopulatedProjectileList(this.cannonShotType,
+                this.cannonShotSpeed, this.cannonShotLimit, canvasWidth, canvasHeight, level);
             //populate missile list
             this.missileList = new Array<Projectile>();
             //create initial target
@@ -601,27 +752,29 @@ module GameObjects {
      * Death Star enemy ship
      */
     export class DeathStarObject extends BossShipObject {
-        constructor(currentX:number, currentY:number, canvasWidth: number, canvasHeight: number, startTime:Date)
+        constructor(currentX:number, currentY:number, canvasWidth: number, canvasHeight: number, startTime:Date,
+            level:number)
         {
             //base constructor
             super(currentX, currentY, canvasWidth, canvasHeight, 
                 CONSTANTS.DEATH_STAR_SPEED, Constants.ShipType.EMPIRE_DEATH_STAR, 
                 startTime, CONSTANTS.DEATH_STAR_HEALTH, CONSTANTS.DEATH_STAR_HEIGHT_HIT_FACTOR,
-                CONSTANTS.DEATH_STAR_IMPERIAL_MISSILE_LIMIT, CONSTANTS.DEATH_STAR_IMPERIAL_SHOT_FIRE_RATE,
-                CONSTANTS.DEATH_STAR_IMPERIAL_MISSILE_FIRE_RATE);
+                Constants.ProjectileType.IMPERIAL_SHOT, CONSTANTS.IMPERIAL_SHOT_SPEED,
+                CONSTANTS.DEATH_STAR_IMPERIAL_SHOT_FIRE_RATE, CONSTANTS.DEATH_STAR_IMPERIAL_SHOT_LIMIT, 
+                CONSTANTS.DEATH_STAR_NUM_MULTI_SHOT, Constants.ProjectileType.IMPERIAL_MISSILE, 
+                CONSTANTS.IMPERIAL_MISSILE_SPEED, CONSTANTS.DEATH_STAR_IMPERIAL_MISSILE_FIRE_RATE, 
+                CONSTANTS.DEATH_STAR_IMPERIAL_MISSILE_LIMIT, level);
             //create & assign image
             var image:HTMLImageElement = new Image();
             image.src = 'images/DeathStar2.png';
             image.onload = function(){ isDeathStarLoaded = true; }
             this.objImage = image;
             //populate projectile list
-            this.cannonShotList = GameLogic.getPopulatedProjectileList(Constants.ProjectileType.IMPERIAL_SHOT,
-                CONSTANTS.IMPERIAL_SHOT_SPEED, CONSTANTS.DEATH_STAR_IMPERIAL_SHOT_LIMIT, canvasWidth,
-                canvasHeight);
+            this.cannonShotList = GameLogic.getPopulatedProjectileList(this.cannonShotType,
+                this.cannonShotSpeed, this.cannonShotLimit, canvasWidth, canvasHeight, level);
             //populate missile list
-            this.missileList = GameLogic.getPopulatedProjectileList(Constants.ProjectileType.IMPERIAL_MISSILE,
-                CONSTANTS.IMPERIAL_MISSILE_SPEED, CONSTANTS.DEATH_STAR_IMPERIAL_MISSILE_LIMIT, canvasWidth,
-                canvasHeight);
+            this.missileList = GameLogic.getPopulatedProjectileList(this.missileType,
+                this.missileSpeed, this.missileLimit, canvasWidth, canvasHeight, level);
             //create initial target
             this.nextWaypoint = this.getNewRandomWaypoint();
             //set targeting
@@ -655,6 +808,62 @@ module GameObjects {
     }
 
     /**
+     * Boba Fett - Bounty Hunter enemy ship
+     */
+    export class BountyHunterObject extends BossShipObject {
+        constructor(currentX:number, currentY:number, canvasWidth: number, canvasHeight: number, startTime:Date,
+            level:number)
+        {
+            //base constructor
+            super(currentX, currentY, canvasWidth, canvasHeight, 
+                CONSTANTS.BOUNTY_HUNTER_SPEED, Constants.ShipType.BOUNTY_HUNTER, 
+                startTime, CONSTANTS.BOUNTY_HUNTER_HEALTH, CONSTANTS.BOUNTY_HUNTER_HEIGHT_HIT_FACTOR,
+                Constants.ProjectileType.TURRET_SPRAY, CONSTANTS.TURRET_SPRAY_SPEED,
+                CONSTANTS.BOUNTY_HUNTER_TURRET_SPRAY_FIRE_RATE, CONSTANTS.BOUNTY_HUNTER_TURRET_SPRAY_LIMIT,
+                CONSTANTS.BOUNTY_HUNTER_NUM_MULTI_SHOT, null, 0, 0, 0, level);
+            //create & assign image
+            var image:HTMLImageElement = new Image();
+            image.src = 'images/Slave3.png';
+            image.onload = function(){ isBountyHunterLoaded = true; }
+            this.objImage = image;
+            //populate projectile list
+            this.cannonShotList = GameLogic.getPopulatedProjectileList(this.cannonShotType,
+                this.cannonShotSpeed, this.cannonShotLimit, canvasWidth, canvasHeight, level);
+            //populate missile list
+            this.missileList = new Array<Projectile>();
+            //create initial target
+            this.nextWaypoint = this.getNewRandomWaypoint();
+            //set targeting
+            this.isTargetingShots = true;
+            this.isTargetingMissiles = false;
+        }
+        
+        /**
+         * Override starting X coordinate for a projectile
+         */
+        getProjectileLocationStartX(): number
+        {
+            return this.getLocationX() + CONSTANTS.BOUNTY_HUNTER_PROJECTILE_OFFSET_X;
+        }
+        
+        /**
+         * Override starting Y coordinate for a projectile
+         */
+        getProjectileLocationStartY(offset:number): number
+        {
+            return this.getLocationY() + CONSTANTS.BOUNTY_HUNTER_PROJECTILE_OFFSET_Y;
+        }
+        
+        /**
+         * Override default waypoint height limit
+         */
+        getPathMaxLimitY() : number
+        {
+            return (this.maxHeight / 3);
+        }
+    }
+
+    /**
      * Base sprite object
      */
     export class SpriteSheetObject extends BaseGameObject {
@@ -676,7 +885,7 @@ module GameObjects {
             maxLoop:number, scaleRatio:number)
         {          
             //base constructor
-            super(x, y, canvasWidth, canvasHeight, 0);
+            super(x, y, canvasWidth, canvasHeight, 0, 1);
             
             //assign
             this.sheetHeight = sheetHeight;
@@ -808,7 +1017,7 @@ module GameObjects {
         speed:number, canvasWidth: number, 
         canvasHeight: number, type:Constants.ProjectileType,
         id:number, now:number, radius:number, color:string,
-        damage:number)
+        damage:number, level:number)
         {
             this.isAlive = false;
             this.isFirst = true;
@@ -822,7 +1031,7 @@ module GameObjects {
             this.isTargeted = false;
             
             //base constructor
-            super(currentX, currentY, canvasWidth, canvasHeight, speed);
+            super(currentX, currentY, canvasWidth, canvasHeight, speed, level);
         }
         
         /**
@@ -926,6 +1135,8 @@ module GameObjects {
         levelFinish:number;
         currentScore:number;
         highScore:number;
+        directHits:number;
+        shotsFired:number;
         grandMasterScore:number;
         personalRecordDisplayed:boolean;
         grandMasterDisplayed:boolean;
@@ -941,6 +1152,8 @@ module GameObjects {
             this.gameDate = new Date(Date.now());
             this.currentScore = 0;
             this.highScore = 0;
+            this.directHits = 0;
+            this.shotsFired = 0;
             this.grandMasterScore = 0;
             this.personalRecordDisplayed = false;
             this.grandMasterDisplayed = false;
@@ -963,6 +1176,21 @@ module GameObjects {
         isHighScore()
         {
             return (this.currentScore > this.highScore);
+        }
+        
+        /**
+         * Calculate efficiency of shots
+         */
+        getAccuracy()
+        {
+            if(this.shotsFired > 0)
+            {
+                return (this.directHits / this.shotsFired) * 100;
+            }
+            else
+            {
+                return 0;
+            }
         }
     }
 
@@ -992,9 +1220,10 @@ module GameObjects {
         y:number;
         isMainColor:boolean;
         renderCount:number;
+        expireCount:number;
         
         constructor(type:Constants.MessageType, text:string, font:string, colorRgb1:string, 
-            colorRgb2:string, x:number, y:number)
+            colorRgb2:string, x:number, y:number, expireCount:number)
         {
             this.type = type;
             this.text = text;
@@ -1003,6 +1232,7 @@ module GameObjects {
             this.colorRgb2 = colorRgb2;
             this.x = x;
             this.y = y;
+            this.expireCount = expireCount;
             
             //default
             this.isMainColor = false;
@@ -1058,16 +1288,51 @@ module GameObjects {
          */
         isExpired()
         {
-            if(this.renderCount > CONSTANTS.MESSAGE_EXPIRE_COUNT)
+            //check if expiration limit set
+            if(this.expireCount > 0)
             {
-                return true;
+                //see if render count exceeds limit
+                if(this.renderCount > this.expireCount)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
             else
             {
-                return false;
+                //no limit set, stop rendering when off screen
+                if(this.y < 1)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
     }
 
+    export class ImageObject extends BaseGameObject {
+        objImage:HTMLImageElement;
+        type:Constants.SpriteType;
+        
+        constructor(positionX:number, positionY:number, canvasWidth:number,
+            canvasHeight:number)
+        {
+            this.type = Constants.SpriteType.INSTRUCTION_PANEL;
+            
+            //create & assign image
+            var image:HTMLImageElement = new Image();
+            image.src = 'images/InstructionPanel3.png';
+            image.onload = function(){ isInstructionPanelLoaded = true; }
+            this.objImage = image;
+            
+            super(positionX, positionY, canvasWidth, canvasHeight, 0, 0);
+        }
+    }
 }
 

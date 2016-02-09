@@ -241,6 +241,16 @@ module Render {
             
             //fire projectile
             GameLogic.fireProjectile(list, 0, boss, true, targetX, targetY);
+            
+            //check if multi-shot projectile
+            if(boss.isMultiShot(list[0].type))
+            {
+                for(var i = 0; i < boss.getNumberOfExtraShots(); i++)
+                {
+                    //fire random projectile
+                    GameLogic.fireProjectile(list, 0, boss, true, GameLogic.getRandomInteger(0, browserWidth), browserHeight);
+                }
+            }
                 
             //set new fire date
             boss.setNewFireTime(timeNow, list[0].type);
@@ -277,6 +287,12 @@ module Render {
                 //and if timing is valid
                 if (GameObjects.isShipLoaded(enemyShipList[i].type) && enemyShipList[i].startTimeIsValid(timeNow)) 
                 {
+                    //check for entry message
+                    if(enemyShipList[i].showEntryMessage())
+                    {
+                        Message.AddEntryMessage(enemyShipList[i].type);
+                    }
+                    
                     //render object
                     canvasContext.drawImage(enemyShipList[i].objImage, enemyShipList[i].getLocationX(), 
                         enemyShipList[i].getLocationY());
@@ -286,6 +302,8 @@ module Render {
                     {
                         //add hit animation
                         GameLogic.addHitAnimation(enemyShipList[i], explosionList, browserWidth, browserHeight);
+                        //update score
+                        currentUserScore.directHits += 1;
                         
                         //check if no health left
                         if(enemyShipList[i].health < 1)
@@ -536,5 +554,17 @@ module Render {
         canvasContext.font = "16px 'Press Start 2P'";
         canvasContext.fillStyle = CONSTANTS.FILL_LIGHT_BLUE;
         canvasContext.fillText("Grand Master Jedi: " + text, browserWidth / 2, browserHeight / 12);
+    }
+    
+    export function drawInstructionPanel(canvasContext:CanvasRenderingContext2D, panel:GameObjects.ImageObject)
+    {
+        if (canvasContext) 
+        {
+            if(GameObjects.isSpriteLoaded(panel.type))
+            {
+                //render object
+                canvasContext.drawImage(panel.objImage, panel.locationX, panel.locationY);
+            }
+        }
     }
 }

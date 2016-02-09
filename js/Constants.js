@@ -25,14 +25,18 @@ var Constants;
             this.MISSILE_RADIUS = 6;
             this.MISSILE_OFFSET_Y = -2;
             this.IMPERIAL_SHOT_RADIUS = 4;
-            this.IMPERIAL_MISSILE_RADIUS = 10;
+            this.IMPERIAL_MISSILE_RADIUS = 8;
+            this.TURRET_SPRAY_RADIUS = 4;
             this.DEATH_STAR_PROJECTILE_OFFSET_X = 93;
             this.DEATH_STAR_PROJECTILE_OFFSET_Y = 82;
+            this.BOUNTY_HUNTER_PROJECTILE_OFFSET_X = 50;
+            this.BOUNTY_HUNTER_PROJECTILE_OFFSET_Y = 100;
             this.DESTROYER_HEIGHT_HIT_FACTOR = 2;
             this.REBEL_SHIP_HEIGHT_HIT_FACTOR = 2;
             this.TIE_FIGHTER_HEIGHT_HIT_FACTOR = 2;
             this.COMMANDER_HEIGHT_HIT_FACTOR = 2;
             this.DEATH_STAR_HEIGHT_HIT_FACTOR = 2;
+            this.BOUNTY_HUNTER_HEIGHT_HIT_FACTOR = 2;
             this.MESSAGE_RISE_FACTOR_Y = 1;
             this.MESSAGE_EXPIRE_COUNT = 175;
             this.MESSAGE_THROTTLE_COUNT = 50;
@@ -43,16 +47,22 @@ var Constants;
             this.COMMANDER_IMPERIAL_SHOT_FIRE_RATE = 0.5;
             this.DEATH_STAR_IMPERIAL_SHOT_LIMIT = 10;
             this.DEATH_STAR_IMPERIAL_SHOT_FIRE_RATE = 1;
-            this.DEATH_STAR_IMPERIAL_MISSILE_LIMIT = 1;
-            this.DEATH_STAR_IMPERIAL_MISSILE_FIRE_RATE = 3;
+            this.DEATH_STAR_IMPERIAL_MISSILE_LIMIT = 2;
+            this.DEATH_STAR_IMPERIAL_MISSILE_FIRE_RATE = 1;
+            this.DEATH_STAR_NUM_MULTI_SHOT = 1;
+            this.BOUNTY_HUNTER_TURRET_SPRAY_LIMIT = 12;
+            this.BOUNTY_HUNTER_TURRET_SPRAY_FIRE_RATE = 1;
+            this.BOUNTY_HUNTER_NUM_MULTI_SHOT = 2;
             this.NUM_FIGHTERS_PER_LEVEL = 3;
             this.NUM_DESTROYERS_PER_LEVEL = 1;
             this.MAX_SECONDS_MULTIPLIER_PER_LEVEL = 10;
             this.LEVEL_LOAD_BUFFER_SECONDS = 2;
             this.COMMANDER_LEVEL_FACTOR = 3;
             this.DEATH_STAR_LEVEL_FACTOR = 5;
+            this.BOUNTY_HUNTER_LEVEL_FACTOR = 7;
             this.ADD_MISSILE_LEVEL = 3;
             this.ADD_HEALTH_LEVEL = 5;
+            this.ENEMY_STAT_INCREASE_LEVEL = 10;
             //speeds
             this.BASE_SPEED = 256;
             this.REBEL_SHIP_SPEED = this.BASE_SPEED;
@@ -60,15 +70,18 @@ var Constants;
             this.DESTROYER_SPEED = (this.BASE_SPEED / 6);
             this.CANNON_SHOT_SPEED = this.BASE_SPEED;
             this.MISSILE_SPEED = (this.BASE_SPEED / 2);
-            this.COMMANDER_SPEED = (this.BASE_SPEED / 6);
-            this.DEATH_STAR_SPEED = (this.BASE_SPEED / 10);
+            this.COMMANDER_SPEED = (this.BASE_SPEED / 4);
+            this.DEATH_STAR_SPEED = (this.BASE_SPEED / 6);
+            this.BOUNTY_HUNTER_SPEED = (this.BASE_SPEED / 1);
+            this.TURRET_SPRAY_SPEED = this.BASE_SPEED;
             this.IMPERIAL_SHOT_SPEED = this.BASE_SPEED;
             this.IMPERIAL_MISSILE_SPEED = (this.BASE_SPEED / 2);
             //colors
-            this.CANNON_SHOT_BLUE = 'CANNON_BLUE';
+            this.CANNON_SHOT_BLUE = 'CANNON_SHOT_BLUE';
             this.MISSLE_PINK = 'MISSLE_PINK';
             this.IMPERIAL_RED = 'IMPERIAL_RED';
             this.IMPERIAL_ORANGE = 'IMPERIAL_ORANGE';
+            this.TURRET_GREEN = 'TURRET_GREEN';
             this.WHITE = 'WHITE';
             this.FILL_WHITE = 'rgb(250, 250, 250)';
             this.FILL_YELLOW = 'rgb(239, 255, 0)';
@@ -81,11 +94,13 @@ var Constants;
             this.CANNON_SHOT_DAMAGE = 1;
             this.IMPERIAL_SHOT_DAMAGE = 1;
             this.IMPERIAL_MISSILE_DAMAGE = 3;
+            this.TURRET_SPRAY_DAMAGE = 1;
             this.MISSILE_DAMAGE = 5;
             this.TIE_FIGHTER_HEALTH = 1;
             this.DESTROYER_HEALTH = 5;
             this.COMMANDER_HEALTH = 20;
             this.DEATH_STAR_HEALTH = 50;
+            this.BOUNTY_HUNTER_HEALTH = 30;
             this.REBEL_SHIP_HEALTH = 3;
             //directions
             this.DEFAULT_DIRECTION_CHANGE_SECONDS = 5;
@@ -103,6 +118,8 @@ var Constants;
                     return '#FF0000';
                 case this.IMPERIAL_ORANGE:
                     return '#ffbf00';
+                case this.TURRET_GREEN:
+                    return '#00ff00';
                 case this.WHITE:
                 default:
                     {
@@ -125,6 +142,8 @@ var Constants;
                 return "Tie Fighter";
             case ShipType.REBEL_MILLENIUM_FALCON:
                 return "Millenium Falcon";
+            case ShipType.BOUNTY_HUNTER:
+                return "Boba Fett";
             default:
                 {
                     return type.toString();
@@ -136,6 +155,7 @@ var Constants;
         ProjectileType[ProjectileType["MISSILE"] = 1] = "MISSILE";
         ProjectileType[ProjectileType["IMPERIAL_SHOT"] = 2] = "IMPERIAL_SHOT";
         ProjectileType[ProjectileType["IMPERIAL_MISSILE"] = 3] = "IMPERIAL_MISSILE";
+        ProjectileType[ProjectileType["TURRET_SPRAY"] = 4] = "TURRET_SPRAY";
     })(Constants_1.ProjectileType || (Constants_1.ProjectileType = {}));
     var ProjectileType = Constants_1.ProjectileType;
     (function (ShipType) {
@@ -144,11 +164,13 @@ var Constants;
         ShipType[ShipType["EMPIRE_DESTROYER"] = 2] = "EMPIRE_DESTROYER";
         ShipType[ShipType["EMPIRE_COMMANDER"] = 3] = "EMPIRE_COMMANDER";
         ShipType[ShipType["EMPIRE_DEATH_STAR"] = 4] = "EMPIRE_DEATH_STAR";
+        ShipType[ShipType["BOUNTY_HUNTER"] = 5] = "BOUNTY_HUNTER";
     })(Constants_1.ShipType || (Constants_1.ShipType = {}));
     var ShipType = Constants_1.ShipType;
     (function (SpriteType) {
         SpriteType[SpriteType["EXPLOSION_SMALL"] = 0] = "EXPLOSION_SMALL";
         SpriteType[SpriteType["EXPLOSION_LARGE"] = 1] = "EXPLOSION_LARGE";
+        SpriteType[SpriteType["INSTRUCTION_PANEL"] = 2] = "INSTRUCTION_PANEL";
     })(Constants_1.SpriteType || (Constants_1.SpriteType = {}));
     var SpriteType = Constants_1.SpriteType;
     (function (Direction) {
@@ -164,6 +186,7 @@ var Constants;
         MessageType[MessageType["ADD_HEALTH"] = 2] = "ADD_HEALTH";
         MessageType[MessageType["NEW_BOSS"] = 3] = "NEW_BOSS";
         MessageType[MessageType["HIGH_SCORE"] = 4] = "HIGH_SCORE";
+        MessageType[MessageType["QUOTE"] = 5] = "QUOTE";
     })(Constants_1.MessageType || (Constants_1.MessageType = {}));
     var MessageType = Constants_1.MessageType;
 })(Constants || (Constants = {}));

@@ -177,6 +177,13 @@ var Render;
             }
             //fire projectile
             GameLogic.fireProjectile(list, 0, boss, true, targetX, targetY);
+            //check if multi-shot projectile
+            if (boss.isMultiShot(list[0].type)) {
+                for (var i = 0; i < boss.getNumberOfExtraShots(); i++) {
+                    //fire random projectile
+                    GameLogic.fireProjectile(list, 0, boss, true, GameLogic.getRandomInteger(0, browserWidth), browserHeight);
+                }
+            }
             //set new fire date
             boss.setNewFireTime(timeNow, list[0].type);
         }
@@ -203,12 +210,18 @@ var Render;
                 //check if image has been loaded
                 //and if timing is valid
                 if (GameObjects.isShipLoaded(enemyShipList[i].type) && enemyShipList[i].startTimeIsValid(timeNow)) {
+                    //check for entry message
+                    if (enemyShipList[i].showEntryMessage()) {
+                        Message.AddEntryMessage(enemyShipList[i].type);
+                    }
                     //render object
                     canvasContext.drawImage(enemyShipList[i].objImage, enemyShipList[i].getLocationX(), enemyShipList[i].getLocationY());
                     //check for collision
                     if (hasBeenHit(enemyShipList[i], cannonShotList, missileList)) {
                         //add hit animation
                         GameLogic.addHitAnimation(enemyShipList[i], explosionList, browserWidth, browserHeight);
+                        //update score
+                        currentUserScore.directHits += 1;
                         //check if no health left
                         if (enemyShipList[i].health < 1) {
                             //update score
@@ -408,5 +421,14 @@ var Render;
         canvasContext.fillText("Grand Master Jedi: " + text, browserWidth / 2, browserHeight / 12);
     }
     Render.drawChampion = drawChampion;
+    function drawInstructionPanel(canvasContext, panel) {
+        if (canvasContext) {
+            if (GameObjects.isSpriteLoaded(panel.type)) {
+                //render object
+                canvasContext.drawImage(panel.objImage, panel.locationX, panel.locationY);
+            }
+        }
+    }
+    Render.drawInstructionPanel = drawInstructionPanel;
 })(Render || (Render = {}));
 //# sourceMappingURL=Render.js.map

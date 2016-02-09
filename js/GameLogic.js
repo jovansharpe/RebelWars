@@ -24,7 +24,10 @@ var GameLogic;
         //start new list
         var bossList = new Array();
         //check for bosses
-        if (currentLevel % CONSTANTS.DEATH_STAR_LEVEL_FACTOR == 0) {
+        if (currentLevel % CONSTANTS.BOUNTY_HUNTER_LEVEL_FACTOR == 0) {
+            addEnemyShips(bossList, 1, Constants.ShipType.BOUNTY_HUNTER, browserWidth, browserHeight, currentLevel);
+        }
+        else if (currentLevel % CONSTANTS.DEATH_STAR_LEVEL_FACTOR == 0) {
             addEnemyShips(bossList, 1, Constants.ShipType.EMPIRE_DEATH_STAR, browserWidth, browserHeight, currentLevel);
         }
         else if (currentLevel % CONSTANTS.COMMANDER_LEVEL_FACTOR == 0) {
@@ -32,7 +35,7 @@ var GameLogic;
         }
         //check if boss added
         if (bossList.length > 0) {
-            AddBossMessage(); //notify user
+            Message.AddBossMessage(); //notify user
         }
         return bossList;
     }
@@ -47,6 +50,7 @@ var GameLogic;
             switch (type) {
                 case Constants.ShipType.EMPIRE_DEATH_STAR:
                 case Constants.ShipType.EMPIRE_COMMANDER:
+                case Constants.ShipType.BOUNTY_HUNTER:
                     enemyShip = getNewBoss(type, browserWidth, browserHeight, currentLevel);
                     break;
                 default:
@@ -67,11 +71,11 @@ var GameLogic;
         var randomTime = addSecondsToDate(Date.now(), (randomSeconds + CONSTANTS.LEVEL_LOAD_BUFFER_SECONDS));
         switch (type) {
             case Constants.ShipType.EMPIRE_DESTROYER:
-                ship = new GameObjects.DestroyerObject(randomX, 0, browserWidth, browserHeight, randomTime);
+                ship = new GameObjects.DestroyerObject(randomX, 0, browserWidth, browserHeight, randomTime, currentLevel);
                 break;
             case Constants.ShipType.EMPIRE_TIE_FIGHTER:
             default:
-                ship = new GameObjects.TieFighterObject(randomX, 0, browserWidth, browserHeight, randomTime);
+                ship = new GameObjects.TieFighterObject(randomX, 0, browserWidth, browserHeight, randomTime, currentLevel);
                 break;
         }
         return ship;
@@ -88,11 +92,14 @@ var GameLogic;
         var maxTime = addSecondsToDate(Date.now(), (maxSeconds + CONSTANTS.LEVEL_LOAD_BUFFER_SECONDS));
         switch (type) {
             case Constants.ShipType.EMPIRE_COMMANDER:
-                ship = new GameObjects.CommanderObject(randomX, randomY, browserWidth, browserHeight, maxTime);
+                ship = new GameObjects.CommanderObject(randomX, randomY, browserWidth, browserHeight, maxTime, currentLevel);
+                break;
+            case Constants.ShipType.BOUNTY_HUNTER:
+                ship = new GameObjects.BountyHunterObject(randomX, randomY, browserWidth, browserHeight, maxTime, currentLevel);
                 break;
             case Constants.ShipType.EMPIRE_DEATH_STAR:
             default:
-                ship = new GameObjects.DeathStarObject(randomX, randomY, browserWidth, browserHeight, maxTime);
+                ship = new GameObjects.DeathStarObject(randomX, randomY, browserWidth, browserHeight, maxTime, currentLevel);
                 break;
         }
         return ship;
@@ -122,11 +129,11 @@ var GameLogic;
             var radius = CONSTANTS.MISSILE_RADIUS;
             var color = CONSTANTS.MISSLE_PINK;
             var damage = CONSTANTS.MISSILE_DAMAGE;
-            var missile = new GameObjects.Projectile(0, 0, CONSTANTS.MISSILE_SPEED, browserWidth, browserHeight, Constants.ProjectileType.MISSILE, id, 0, radius, color, damage);
+            var missile = new GameObjects.Projectile(0, 0, CONSTANTS.MISSILE_SPEED, browserWidth, browserHeight, Constants.ProjectileType.MISSILE, id, 0, radius, color, damage, currentLevel);
             //add missile
             missileList.push(missile);
             //notify user
-            AddMissileMessage();
+            Message.AddMissileMessage();
         }
     }
     GameLogic.equipMissiles = equipMissiles;
@@ -140,14 +147,14 @@ var GameLogic;
             ship.maxHealth += 1;
             ship.health += 1;
             //notify user
-            AddHealthMessage(1);
+            Message.AddHealthMessage(1);
         }
     }
     GameLogic.checkRebelShipHealth = checkRebelShipHealth;
     /**
      * Create list populated with Projectile projects
      */
-    function getPopulatedProjectileList(type, speed, limit, canvasWidth, canvasHeight) {
+    function getPopulatedProjectileList(type, speed, limit, canvasWidth, canvasHeight, currentLevel) {
         var list = new Array();
         var radius = 0;
         var color = '';
@@ -168,6 +175,11 @@ var GameLogic;
                 color = CONSTANTS.IMPERIAL_ORANGE;
                 damage = CONSTANTS.IMPERIAL_MISSILE_DAMAGE;
                 break;
+            case Constants.ProjectileType.TURRET_SPRAY:
+                radius = CONSTANTS.TURRET_SPRAY_RADIUS;
+                color = CONSTANTS.TURRET_GREEN;
+                damage = CONSTANTS.TURRET_SPRAY_DAMAGE;
+                break;
             default:
                 radius = CONSTANTS.CANNON_SHOT_RADIUS;
                 color = CONSTANTS.CANNON_SHOT_BLUE;
@@ -175,7 +187,7 @@ var GameLogic;
                 break;
         }
         for (var i = 0; i < limit; i++) {
-            list.push(new GameObjects.Projectile(0, 0, speed, canvasWidth, canvasHeight, type, i, 0, radius, color, damage));
+            list.push(new GameObjects.Projectile(0, 0, speed, canvasWidth, canvasHeight, type, i, 0, radius, color, damage, currentLevel));
         }
         return list;
     }
@@ -210,7 +222,7 @@ var GameLogic;
     }
     GameLogic.getProjectilesByStatus = getProjectilesByStatus;
     /**
-     * Create new projectile object
+     * Create new projectile object. Returns number of projectiles activated.
      */
     function fireProjectile(list, offset, ship, isTargeted, targetX, targetY) {
         //get id of next available unused projectile
@@ -222,6 +234,10 @@ var GameLogic;
             var y = ship.getProjectileLocationStartY(offset);
             //activate projectile
             activateProjectile(id, list, x, y, isTargeted, targetX, targetY);
+            return 1;
+        }
+        else {
+            return 0;
         }
     }
     GameLogic.fireProjectile = fireProjectile;
@@ -323,6 +339,7 @@ var GameLogic;
         var font = fontSize.toString() + "px 'Orbitron'";
         var colorRgb1;
         var colorRgb2 = CONSTANTS.FILL_YELLOW;
+        var expireCount = CONSTANTS.MESSAGE_EXPIRE_COUNT;
         switch (type) {
             case Constants.MessageType.ADD_HEALTH:
             case Constants.MessageType.ADD_MISSILE:
@@ -336,14 +353,31 @@ var GameLogic;
                 colorRgb1 = CONSTANTS.FILL_ORANGE;
                 colorRgb2 = CONSTANTS.FILL_WHITE;
                 break;
+            case Constants.MessageType.QUOTE:
+                colorRgb1 = CONSTANTS.FILL_YELLOW;
+                colorRgb2 = CONSTANTS.FILL_WHITE;
+                expireCount = 0; //show entire screen
+                break;
             default:
                 colorRgb1 = CONSTANTS.FILL_WHITE;
                 break;
         }
         //add message
-        list.push(new GameObjects.Message(type, text, font, colorRgb1, colorRgb2, startX, startY));
+        list.push(new GameObjects.Message(type, text, font, colorRgb1, colorRgb2, startX, startY, expireCount));
     }
     GameLogic.addNewMessage = addNewMessage;
+    /**
+     * Get current factor of difficulty
+     */
+    function getDifficultyFactor(level) {
+        var factor = 0;
+        var factorLevel = CONSTANTS.ENEMY_STAT_INCREASE_LEVEL;
+        if (level > factorLevel) {
+            factor = Math.floor(factorLevel / level);
+        }
+        return factor;
+    }
+    GameLogic.getDifficultyFactor = getDifficultyFactor;
     /**
      * Check if browser is compliant
      */

@@ -25,14 +25,18 @@ var Constants;
             this.MISSILE_RADIUS = 6;
             this.MISSILE_OFFSET_Y = -2;
             this.IMPERIAL_SHOT_RADIUS = 4;
-            this.IMPERIAL_MISSILE_RADIUS = 10;
+            this.IMPERIAL_MISSILE_RADIUS = 8;
+            this.TURRET_SPRAY_RADIUS = 4;
             this.DEATH_STAR_PROJECTILE_OFFSET_X = 93;
             this.DEATH_STAR_PROJECTILE_OFFSET_Y = 82;
+            this.BOUNTY_HUNTER_PROJECTILE_OFFSET_X = 50;
+            this.BOUNTY_HUNTER_PROJECTILE_OFFSET_Y = 100;
             this.DESTROYER_HEIGHT_HIT_FACTOR = 2;
             this.REBEL_SHIP_HEIGHT_HIT_FACTOR = 2;
             this.TIE_FIGHTER_HEIGHT_HIT_FACTOR = 2;
             this.COMMANDER_HEIGHT_HIT_FACTOR = 2;
             this.DEATH_STAR_HEIGHT_HIT_FACTOR = 2;
+            this.BOUNTY_HUNTER_HEIGHT_HIT_FACTOR = 2;
             this.MESSAGE_RISE_FACTOR_Y = 1;
             this.MESSAGE_EXPIRE_COUNT = 175;
             this.MESSAGE_THROTTLE_COUNT = 50;
@@ -43,16 +47,22 @@ var Constants;
             this.COMMANDER_IMPERIAL_SHOT_FIRE_RATE = 0.5;
             this.DEATH_STAR_IMPERIAL_SHOT_LIMIT = 10;
             this.DEATH_STAR_IMPERIAL_SHOT_FIRE_RATE = 1;
-            this.DEATH_STAR_IMPERIAL_MISSILE_LIMIT = 1;
-            this.DEATH_STAR_IMPERIAL_MISSILE_FIRE_RATE = 3;
+            this.DEATH_STAR_IMPERIAL_MISSILE_LIMIT = 2;
+            this.DEATH_STAR_IMPERIAL_MISSILE_FIRE_RATE = 1;
+            this.DEATH_STAR_NUM_MULTI_SHOT = 1;
+            this.BOUNTY_HUNTER_TURRET_SPRAY_LIMIT = 12;
+            this.BOUNTY_HUNTER_TURRET_SPRAY_FIRE_RATE = 1;
+            this.BOUNTY_HUNTER_NUM_MULTI_SHOT = 2;
             this.NUM_FIGHTERS_PER_LEVEL = 3;
             this.NUM_DESTROYERS_PER_LEVEL = 1;
             this.MAX_SECONDS_MULTIPLIER_PER_LEVEL = 10;
             this.LEVEL_LOAD_BUFFER_SECONDS = 2;
             this.COMMANDER_LEVEL_FACTOR = 3;
             this.DEATH_STAR_LEVEL_FACTOR = 5;
+            this.BOUNTY_HUNTER_LEVEL_FACTOR = 7;
             this.ADD_MISSILE_LEVEL = 3;
             this.ADD_HEALTH_LEVEL = 5;
+            this.ENEMY_STAT_INCREASE_LEVEL = 10;
             //speeds
             this.BASE_SPEED = 256;
             this.REBEL_SHIP_SPEED = this.BASE_SPEED;
@@ -60,15 +70,18 @@ var Constants;
             this.DESTROYER_SPEED = (this.BASE_SPEED / 6);
             this.CANNON_SHOT_SPEED = this.BASE_SPEED;
             this.MISSILE_SPEED = (this.BASE_SPEED / 2);
-            this.COMMANDER_SPEED = (this.BASE_SPEED / 6);
-            this.DEATH_STAR_SPEED = (this.BASE_SPEED / 10);
+            this.COMMANDER_SPEED = (this.BASE_SPEED / 4);
+            this.DEATH_STAR_SPEED = (this.BASE_SPEED / 6);
+            this.BOUNTY_HUNTER_SPEED = (this.BASE_SPEED / 1);
+            this.TURRET_SPRAY_SPEED = this.BASE_SPEED;
             this.IMPERIAL_SHOT_SPEED = this.BASE_SPEED;
             this.IMPERIAL_MISSILE_SPEED = (this.BASE_SPEED / 2);
             //colors
-            this.CANNON_SHOT_BLUE = 'CANNON_BLUE';
+            this.CANNON_SHOT_BLUE = 'CANNON_SHOT_BLUE';
             this.MISSLE_PINK = 'MISSLE_PINK';
             this.IMPERIAL_RED = 'IMPERIAL_RED';
             this.IMPERIAL_ORANGE = 'IMPERIAL_ORANGE';
+            this.TURRET_GREEN = 'TURRET_GREEN';
             this.WHITE = 'WHITE';
             this.FILL_WHITE = 'rgb(250, 250, 250)';
             this.FILL_YELLOW = 'rgb(239, 255, 0)';
@@ -81,11 +94,13 @@ var Constants;
             this.CANNON_SHOT_DAMAGE = 1;
             this.IMPERIAL_SHOT_DAMAGE = 1;
             this.IMPERIAL_MISSILE_DAMAGE = 3;
+            this.TURRET_SPRAY_DAMAGE = 1;
             this.MISSILE_DAMAGE = 5;
             this.TIE_FIGHTER_HEALTH = 1;
             this.DESTROYER_HEALTH = 5;
             this.COMMANDER_HEALTH = 20;
             this.DEATH_STAR_HEALTH = 50;
+            this.BOUNTY_HUNTER_HEALTH = 30;
             this.REBEL_SHIP_HEALTH = 3;
             //directions
             this.DEFAULT_DIRECTION_CHANGE_SECONDS = 5;
@@ -103,6 +118,8 @@ var Constants;
                     return '#FF0000';
                 case this.IMPERIAL_ORANGE:
                     return '#ffbf00';
+                case this.TURRET_GREEN:
+                    return '#00ff00';
                 case this.WHITE:
                 default:
                     {
@@ -125,6 +142,8 @@ var Constants;
                 return "Tie Fighter";
             case ShipType.REBEL_MILLENIUM_FALCON:
                 return "Millenium Falcon";
+            case ShipType.BOUNTY_HUNTER:
+                return "Boba Fett";
             default:
                 {
                     return type.toString();
@@ -136,6 +155,7 @@ var Constants;
         ProjectileType[ProjectileType["MISSILE"] = 1] = "MISSILE";
         ProjectileType[ProjectileType["IMPERIAL_SHOT"] = 2] = "IMPERIAL_SHOT";
         ProjectileType[ProjectileType["IMPERIAL_MISSILE"] = 3] = "IMPERIAL_MISSILE";
+        ProjectileType[ProjectileType["TURRET_SPRAY"] = 4] = "TURRET_SPRAY";
     })(Constants_1.ProjectileType || (Constants_1.ProjectileType = {}));
     var ProjectileType = Constants_1.ProjectileType;
     (function (ShipType) {
@@ -144,11 +164,13 @@ var Constants;
         ShipType[ShipType["EMPIRE_DESTROYER"] = 2] = "EMPIRE_DESTROYER";
         ShipType[ShipType["EMPIRE_COMMANDER"] = 3] = "EMPIRE_COMMANDER";
         ShipType[ShipType["EMPIRE_DEATH_STAR"] = 4] = "EMPIRE_DEATH_STAR";
+        ShipType[ShipType["BOUNTY_HUNTER"] = 5] = "BOUNTY_HUNTER";
     })(Constants_1.ShipType || (Constants_1.ShipType = {}));
     var ShipType = Constants_1.ShipType;
     (function (SpriteType) {
         SpriteType[SpriteType["EXPLOSION_SMALL"] = 0] = "EXPLOSION_SMALL";
         SpriteType[SpriteType["EXPLOSION_LARGE"] = 1] = "EXPLOSION_LARGE";
+        SpriteType[SpriteType["INSTRUCTION_PANEL"] = 2] = "INSTRUCTION_PANEL";
     })(Constants_1.SpriteType || (Constants_1.SpriteType = {}));
     var SpriteType = Constants_1.SpriteType;
     (function (Direction) {
@@ -164,6 +186,7 @@ var Constants;
         MessageType[MessageType["ADD_HEALTH"] = 2] = "ADD_HEALTH";
         MessageType[MessageType["NEW_BOSS"] = 3] = "NEW_BOSS";
         MessageType[MessageType["HIGH_SCORE"] = 4] = "HIGH_SCORE";
+        MessageType[MessageType["QUOTE"] = 5] = "QUOTE";
     })(Constants_1.MessageType || (Constants_1.MessageType = {}));
     var MessageType = Constants_1.MessageType;
 })(Constants || (Constants = {}));
@@ -412,8 +435,10 @@ var GameObjects;
     var isDestroyerLoaded = false;
     var isCommanderLoaded = false;
     var isDeathStarLoaded = false;
+    var isBountyHunterLoaded = false;
     var isExplosionSmallLoaded = false;
     var isExplosionLargeLoaded = false;
+    var isInstructionPanelLoaded = false;
     /**
      * Check if a specific ship types image has been loaded already
      */
@@ -435,6 +460,9 @@ var GameObjects;
             case Constants.ShipType.EMPIRE_DEATH_STAR:
                 loaded = isDeathStarLoaded;
                 break;
+            case Constants.ShipType.BOUNTY_HUNTER:
+                loaded = isBountyHunterLoaded;
+                break;
         }
         return loaded;
     }
@@ -451,6 +479,9 @@ var GameObjects;
             case Constants.SpriteType.EXPLOSION_LARGE:
                 loaded = isExplosionLargeLoaded;
                 break;
+            case Constants.SpriteType.INSTRUCTION_PANEL:
+                loaded = isInstructionPanelLoaded;
+                break;
         }
         return loaded;
     }
@@ -459,12 +490,14 @@ var GameObjects;
      * Base class for on screen objects
      */
     var BaseGameObject = (function () {
-        function BaseGameObject(currentX, currentY, canvasWidth, canvasHeight, speed) {
+        function BaseGameObject(currentX, currentY, canvasWidth, canvasHeight, speed, level) {
             this.speed = speed;
             this.maxHeight = canvasHeight;
             this.maxWidth = canvasWidth;
             this.locationX = currentX;
             this.locationY = currentY;
+            //adjust object speed
+            this.setSpeedBasedOnLevel(level);
         }
         /**
          * Change current X (horizontal) coordinate
@@ -478,6 +511,15 @@ var GameObjects;
         BaseGameObject.prototype.moveLocationY = function (pixels) {
             this.locationY = this.locationY + (pixels * this.speed);
         };
+        /**
+         * Adjust object speed based on level
+         */
+        BaseGameObject.prototype.setSpeedBasedOnLevel = function (level) {
+            //get difficulty factor
+            var factor = GameLogic.getDifficultyFactor(level);
+            //add to speed of ship    
+            this.speed += (this.speed * (1 / 4) * factor);
+        };
         return BaseGameObject;
     })();
     GameObjects.BaseGameObject = BaseGameObject;
@@ -486,15 +528,17 @@ var GameObjects;
      */
     var ShipObject = (function (_super) {
         __extends(ShipObject, _super);
-        function ShipObject(currentX, currentY, canvasWidth, canvasHeight, speed, type, createDate, health, heightHitFactor) {
+        function ShipObject(currentX, currentY, canvasWidth, canvasHeight, speed, type, createDate, health, heightHitFactor, level) {
             //base constructor
-            _super.call(this, currentX, currentY, canvasWidth, canvasHeight, speed);
+            _super.call(this, currentX, currentY, canvasWidth, canvasHeight, speed, level);
             //assign
             this.type = type;
             this.health = health;
             this.maxHealth = health;
             this.startDate = createDate;
             this.heightHitFactor = heightHitFactor;
+            //default
+            this.onScreen = false;
         }
         /**
          * Get current Y (vertical) coordinate
@@ -594,6 +638,20 @@ var GameObjects;
             }
             this.locationY = this.locationY + step;
         };
+        ShipObject.prototype.showEntryMessage = function () {
+            var showMessage = false;
+            if (!this.onScreen) {
+                this.onScreen = true;
+                switch (this.type) {
+                    case Constants.ShipType.BOUNTY_HUNTER:
+                    case Constants.ShipType.EMPIRE_COMMANDER:
+                    case Constants.ShipType.EMPIRE_DESTROYER:
+                        showMessage = true;
+                        break;
+                }
+            }
+            return showMessage;
+        };
         return ShipObject;
     })(BaseGameObject);
     GameObjects.ShipObject = ShipObject;
@@ -602,7 +660,7 @@ var GameObjects;
      */
     var RebelShipObject = (function (_super) {
         __extends(RebelShipObject, _super);
-        function RebelShipObject(canvasWidth, canvasHeight) {
+        function RebelShipObject(canvasWidth, canvasHeight, level) {
             //create & assign image
             var image = new Image();
             image.src = 'images/falcon2.png';
@@ -613,7 +671,7 @@ var GameObjects;
             //default
             this.direction = Constants.Direction.RIGHT;
             //base constructor
-            _super.call(this, currentX, currentY, canvasWidth, canvasHeight, CONSTANTS.REBEL_SHIP_SPEED, Constants.ShipType.REBEL_MILLENIUM_FALCON, new Date(Date.now()), CONSTANTS.REBEL_SHIP_HEALTH, CONSTANTS.REBEL_SHIP_HEIGHT_HIT_FACTOR);
+            _super.call(this, currentX, currentY, canvasWidth, canvasHeight, CONSTANTS.REBEL_SHIP_SPEED, Constants.ShipType.REBEL_MILLENIUM_FALCON, new Date(Date.now()), CONSTANTS.REBEL_SHIP_HEALTH, CONSTANTS.REBEL_SHIP_HEIGHT_HIT_FACTOR, level);
         }
         /**
          * Place object back to start position. Middle of screen at the bottom.
@@ -649,15 +707,25 @@ var GameObjects;
      */
     var TieFighterObject = (function (_super) {
         __extends(TieFighterObject, _super);
-        function TieFighterObject(currentX, currentY, canvasWidth, canvasHeight, startTime) {
+        function TieFighterObject(currentX, currentY, canvasWidth, canvasHeight, startTime, level) {
             //base constructor
-            _super.call(this, currentX, currentY, canvasWidth, canvasHeight, CONSTANTS.TIE_FIGHTER_SPEED, Constants.ShipType.EMPIRE_TIE_FIGHTER, startTime, CONSTANTS.TIE_FIGHTER_HEALTH, CONSTANTS.TIE_FIGHTER_HEIGHT_HIT_FACTOR);
+            _super.call(this, currentX, currentY, canvasWidth, canvasHeight, CONSTANTS.TIE_FIGHTER_SPEED, Constants.ShipType.EMPIRE_TIE_FIGHTER, startTime, CONSTANTS.TIE_FIGHTER_HEALTH, CONSTANTS.TIE_FIGHTER_HEIGHT_HIT_FACTOR, level);
             //create & assign image
             var image = new Image();
             image.src = 'images/TieFighter3.png';
             image.onload = function () { isTieFighterLoaded = true; };
             this.objImage = image;
+            this.setStatsBasedOnDifficulty(level);
         }
+        /**
+         * Adjust ship properties based on current level.
+         */
+        TieFighterObject.prototype.setStatsBasedOnDifficulty = function (level) {
+            //get difficulty factor
+            var factor = GameLogic.getDifficultyFactor(level);
+            //add to health of ship
+            this.health = this.maxHealth = (this.maxHealth + factor);
+        };
         return TieFighterObject;
     })(ShipObject);
     GameObjects.TieFighterObject = TieFighterObject;
@@ -666,15 +734,24 @@ var GameObjects;
      */
     var DestroyerObject = (function (_super) {
         __extends(DestroyerObject, _super);
-        function DestroyerObject(currentX, currentY, canvasWidth, canvasHeight, startTime) {
+        function DestroyerObject(currentX, currentY, canvasWidth, canvasHeight, startTime, level) {
             //base constructor
-            _super.call(this, currentX, currentY, canvasWidth, canvasHeight, CONSTANTS.DESTROYER_SPEED, Constants.ShipType.EMPIRE_DESTROYER, startTime, CONSTANTS.DESTROYER_HEALTH, CONSTANTS.DESTROYER_HEIGHT_HIT_FACTOR);
+            _super.call(this, currentX, currentY, canvasWidth, canvasHeight, CONSTANTS.DESTROYER_SPEED, Constants.ShipType.EMPIRE_DESTROYER, startTime, CONSTANTS.DESTROYER_HEALTH, CONSTANTS.DESTROYER_HEIGHT_HIT_FACTOR, level);
             //create & assign image
             var image = new Image();
             image.src = 'images/Destroyer3.png';
             image.onload = function () { isDestroyerLoaded = true; };
             this.objImage = image;
         }
+        /**
+         * Adjust ship properties based on current level.
+         */
+        DestroyerObject.prototype.setStatsBasedOnDifficulty = function (level) {
+            //get difficulty factor
+            var factor = GameLogic.getDifficultyFactor(level);
+            //add to health of ship
+            this.health = this.maxHealth = (this.maxHealth + (factor * 2));
+        };
         return DestroyerObject;
     })(ShipObject);
     GameObjects.DestroyerObject = DestroyerObject;
@@ -683,15 +760,25 @@ var GameObjects;
      */
     var BossShipObject = (function (_super) {
         __extends(BossShipObject, _super);
-        function BossShipObject(currentX, currentY, canvasWidth, canvasHeight, speed, type, startTime, health, heightHitFactor, numberOfShots, fireRateShots, fireRateMissiles) {
+        function BossShipObject(currentX, currentY, canvasWidth, canvasHeight, speed, type, startTime, health, heightHitFactor, cannonShotType, cannonShotSpeed, cannonShotFireRate, cannonShotLimit, numberOfExtraShots, missileType, missileSpeed, missileFireRate, missileLimit, level) {
             //base constructor
             //cut height in half
-            _super.call(this, currentX, currentY, canvasWidth, canvasHeight, speed, type, startTime, health, heightHitFactor);
-            //set fire rate
-            this.fireRateShots = fireRateShots;
-            this.fireRateMissiles = fireRateMissiles;
+            _super.call(this, currentX, currentY, canvasWidth, canvasHeight, speed, type, startTime, health, heightHitFactor, level);
+            //set cannon specs
+            this.cannonShotType = cannonShotType;
+            this.cannonShotSpeed = cannonShotSpeed;
+            this.cannonShotFireRate = cannonShotFireRate;
+            this.cannonShotLimit = cannonShotLimit;
+            this.numberOfExtraShots = numberOfExtraShots;
             this.nextFireTimeShot = this.getNextFireDate(Date.now(), Constants.ProjectileType.IMPERIAL_SHOT);
+            //set missile specs
+            this.missileType = missileType;
+            this.missileSpeed = missileSpeed;
+            this.missileFireRate = missileFireRate;
+            this.missileLimit = missileLimit;
             this.nextFireTimeMissile = this.getNextFireDate(Date.now(), Constants.ProjectileType.IMPERIAL_MISSILE);
+            //set difficultyLevel
+            this.setStatsBasedOnDifficulty(level);
         }
         /**
          * Override default ship movement. Bosses use vector movement.
@@ -729,6 +816,17 @@ var GameObjects;
         };
         BossShipObject.prototype.getPathMaxLimitY = function () {
             return (this.maxHeight / 2);
+        };
+        /**
+         * Retrieve number of additional projectiles to create per round
+         */
+        BossShipObject.prototype.getNumberOfExtraShots = function () {
+            if (this.numberOfExtraShots != null) {
+                return this.numberOfExtraShots;
+            }
+            else {
+                return 0;
+            }
         };
         /**
          * Check if a specific type of projectile is targeting player
@@ -769,10 +867,10 @@ var GameObjects;
             var seconds = 0;
             switch (type) {
                 case Constants.ProjectileType.IMPERIAL_MISSILE:
-                    seconds = this.fireRateMissiles;
+                    seconds = this.missileFireRate;
                     break;
                 default:
-                    seconds = this.fireRateShots;
+                    seconds = this.cannonShotFireRate;
                     break;
             }
             return GameLogic.addSecondsToDate(time, seconds);
@@ -810,6 +908,37 @@ var GameObjects;
                 return false;
             }
         };
+        /**
+         * Check if projectile type shoots multiple times per round
+         */
+        BossShipObject.prototype.isMultiShot = function (type) {
+            switch (type) {
+                case Constants.ProjectileType.TURRET_SPRAY:
+                case Constants.ProjectileType.IMPERIAL_SHOT:
+                    return true;
+                    break;
+                default:
+                    return false;
+                    break;
+            }
+        };
+        /**
+         * Adjust ship properties based on current level.
+         */
+        BossShipObject.prototype.setStatsBasedOnDifficulty = function (level) {
+            //get difficulty factor
+            var factor = GameLogic.getDifficultyFactor(level);
+            //add to health of ship
+            this.health = this.maxHealth = (this.maxHealth + (this.maxHealth * (1 / 5) * factor));
+            //add to speed of cannon
+            this.cannonShotSpeed += (this.cannonShotSpeed * (1 / 4) * factor);
+            //increase cannon fire rate
+            this.cannonShotFireRate += (this.cannonShotFireRate * (1 / 4) * factor);
+            //add to speed of missile
+            this.missileSpeed += (this.missileSpeed * (1 / 4) * factor);
+            //increase missile fire rate
+            this.missileFireRate += (this.missileFireRate * (1 / 4) * factor);
+        };
         return BossShipObject;
     })(ShipObject);
     GameObjects.BossShipObject = BossShipObject;
@@ -818,16 +947,16 @@ var GameObjects;
      */
     var CommanderObject = (function (_super) {
         __extends(CommanderObject, _super);
-        function CommanderObject(currentX, currentY, canvasWidth, canvasHeight, startTime) {
+        function CommanderObject(currentX, currentY, canvasWidth, canvasHeight, startTime, level) {
             //base constructor
-            _super.call(this, currentX, currentY, canvasWidth, canvasHeight, CONSTANTS.COMMANDER_SPEED, Constants.ShipType.EMPIRE_COMMANDER, startTime, CONSTANTS.COMMANDER_HEALTH, CONSTANTS.COMMANDER_HEIGHT_HIT_FACTOR, CONSTANTS.COMMANDER_IMPERIAL_SHOT_LIMIT, CONSTANTS.COMMANDER_IMPERIAL_SHOT_FIRE_RATE, 0);
+            _super.call(this, currentX, currentY, canvasWidth, canvasHeight, CONSTANTS.COMMANDER_SPEED, Constants.ShipType.EMPIRE_COMMANDER, startTime, CONSTANTS.COMMANDER_HEALTH, CONSTANTS.COMMANDER_HEIGHT_HIT_FACTOR, Constants.ProjectileType.IMPERIAL_SHOT, CONSTANTS.IMPERIAL_SHOT_SPEED, CONSTANTS.COMMANDER_IMPERIAL_SHOT_FIRE_RATE, CONSTANTS.COMMANDER_IMPERIAL_SHOT_LIMIT, 0, null, 0, 0, 0, level);
             //create & assign image
             var image = new Image();
             image.src = 'images/Commander2.png';
             image.onload = function () { isCommanderLoaded = true; };
             this.objImage = image;
             //populate projectile list
-            this.cannonShotList = GameLogic.getPopulatedProjectileList(Constants.ProjectileType.IMPERIAL_SHOT, CONSTANTS.IMPERIAL_SHOT_SPEED, CONSTANTS.COMMANDER_IMPERIAL_SHOT_LIMIT, canvasWidth, canvasHeight);
+            this.cannonShotList = GameLogic.getPopulatedProjectileList(this.cannonShotType, this.cannonShotSpeed, this.cannonShotLimit, canvasWidth, canvasHeight, level);
             //populate missile list
             this.missileList = new Array();
             //create initial target
@@ -856,18 +985,18 @@ var GameObjects;
      */
     var DeathStarObject = (function (_super) {
         __extends(DeathStarObject, _super);
-        function DeathStarObject(currentX, currentY, canvasWidth, canvasHeight, startTime) {
+        function DeathStarObject(currentX, currentY, canvasWidth, canvasHeight, startTime, level) {
             //base constructor
-            _super.call(this, currentX, currentY, canvasWidth, canvasHeight, CONSTANTS.DEATH_STAR_SPEED, Constants.ShipType.EMPIRE_DEATH_STAR, startTime, CONSTANTS.DEATH_STAR_HEALTH, CONSTANTS.DEATH_STAR_HEIGHT_HIT_FACTOR, CONSTANTS.DEATH_STAR_IMPERIAL_MISSILE_LIMIT, CONSTANTS.DEATH_STAR_IMPERIAL_SHOT_FIRE_RATE, CONSTANTS.DEATH_STAR_IMPERIAL_MISSILE_FIRE_RATE);
+            _super.call(this, currentX, currentY, canvasWidth, canvasHeight, CONSTANTS.DEATH_STAR_SPEED, Constants.ShipType.EMPIRE_DEATH_STAR, startTime, CONSTANTS.DEATH_STAR_HEALTH, CONSTANTS.DEATH_STAR_HEIGHT_HIT_FACTOR, Constants.ProjectileType.IMPERIAL_SHOT, CONSTANTS.IMPERIAL_SHOT_SPEED, CONSTANTS.DEATH_STAR_IMPERIAL_SHOT_FIRE_RATE, CONSTANTS.DEATH_STAR_IMPERIAL_SHOT_LIMIT, CONSTANTS.DEATH_STAR_NUM_MULTI_SHOT, Constants.ProjectileType.IMPERIAL_MISSILE, CONSTANTS.IMPERIAL_MISSILE_SPEED, CONSTANTS.DEATH_STAR_IMPERIAL_MISSILE_FIRE_RATE, CONSTANTS.DEATH_STAR_IMPERIAL_MISSILE_LIMIT, level);
             //create & assign image
             var image = new Image();
             image.src = 'images/DeathStar2.png';
             image.onload = function () { isDeathStarLoaded = true; };
             this.objImage = image;
             //populate projectile list
-            this.cannonShotList = GameLogic.getPopulatedProjectileList(Constants.ProjectileType.IMPERIAL_SHOT, CONSTANTS.IMPERIAL_SHOT_SPEED, CONSTANTS.DEATH_STAR_IMPERIAL_SHOT_LIMIT, canvasWidth, canvasHeight);
+            this.cannonShotList = GameLogic.getPopulatedProjectileList(this.cannonShotType, this.cannonShotSpeed, this.cannonShotLimit, canvasWidth, canvasHeight, level);
             //populate missile list
-            this.missileList = GameLogic.getPopulatedProjectileList(Constants.ProjectileType.IMPERIAL_MISSILE, CONSTANTS.IMPERIAL_MISSILE_SPEED, CONSTANTS.DEATH_STAR_IMPERIAL_MISSILE_LIMIT, canvasWidth, canvasHeight);
+            this.missileList = GameLogic.getPopulatedProjectileList(this.missileType, this.missileSpeed, this.missileLimit, canvasWidth, canvasHeight, level);
             //create initial target
             this.nextWaypoint = this.getNewRandomWaypoint();
             //set targeting
@@ -896,13 +1025,57 @@ var GameObjects;
     })(BossShipObject);
     GameObjects.DeathStarObject = DeathStarObject;
     /**
+     * Boba Fett - Bounty Hunter enemy ship
+     */
+    var BountyHunterObject = (function (_super) {
+        __extends(BountyHunterObject, _super);
+        function BountyHunterObject(currentX, currentY, canvasWidth, canvasHeight, startTime, level) {
+            //base constructor
+            _super.call(this, currentX, currentY, canvasWidth, canvasHeight, CONSTANTS.BOUNTY_HUNTER_SPEED, Constants.ShipType.BOUNTY_HUNTER, startTime, CONSTANTS.BOUNTY_HUNTER_HEALTH, CONSTANTS.BOUNTY_HUNTER_HEIGHT_HIT_FACTOR, Constants.ProjectileType.TURRET_SPRAY, CONSTANTS.TURRET_SPRAY_SPEED, CONSTANTS.BOUNTY_HUNTER_TURRET_SPRAY_FIRE_RATE, CONSTANTS.BOUNTY_HUNTER_TURRET_SPRAY_LIMIT, CONSTANTS.BOUNTY_HUNTER_NUM_MULTI_SHOT, null, 0, 0, 0, level);
+            //create & assign image
+            var image = new Image();
+            image.src = 'images/Slave3.png';
+            image.onload = function () { isBountyHunterLoaded = true; };
+            this.objImage = image;
+            //populate projectile list
+            this.cannonShotList = GameLogic.getPopulatedProjectileList(this.cannonShotType, this.cannonShotSpeed, this.cannonShotLimit, canvasWidth, canvasHeight, level);
+            //populate missile list
+            this.missileList = new Array();
+            //create initial target
+            this.nextWaypoint = this.getNewRandomWaypoint();
+            //set targeting
+            this.isTargetingShots = true;
+            this.isTargetingMissiles = false;
+        }
+        /**
+         * Override starting X coordinate for a projectile
+         */
+        BountyHunterObject.prototype.getProjectileLocationStartX = function () {
+            return this.getLocationX() + CONSTANTS.BOUNTY_HUNTER_PROJECTILE_OFFSET_X;
+        };
+        /**
+         * Override starting Y coordinate for a projectile
+         */
+        BountyHunterObject.prototype.getProjectileLocationStartY = function (offset) {
+            return this.getLocationY() + CONSTANTS.BOUNTY_HUNTER_PROJECTILE_OFFSET_Y;
+        };
+        /**
+         * Override default waypoint height limit
+         */
+        BountyHunterObject.prototype.getPathMaxLimitY = function () {
+            return (this.maxHeight / 3);
+        };
+        return BountyHunterObject;
+    })(BossShipObject);
+    GameObjects.BountyHunterObject = BountyHunterObject;
+    /**
      * Base sprite object
      */
     var SpriteSheetObject = (function (_super) {
         __extends(SpriteSheetObject, _super);
         function SpriteSheetObject(x, y, canvasWidth, canvasHeight, sheetHeight, sheetWidth, numberOfFrames, ticksPerFrame, type, maxLoop, scaleRatio) {
             //base constructor
-            _super.call(this, x, y, canvasWidth, canvasHeight, 0);
+            _super.call(this, x, y, canvasWidth, canvasHeight, 0, 1);
             //assign
             this.sheetHeight = sheetHeight;
             this.sheetWidth = sheetWidth;
@@ -994,7 +1167,7 @@ var GameObjects;
      */
     var Projectile = (function (_super) {
         __extends(Projectile, _super);
-        function Projectile(currentX, currentY, speed, canvasWidth, canvasHeight, type, id, now, radius, color, damage) {
+        function Projectile(currentX, currentY, speed, canvasWidth, canvasHeight, type, id, now, radius, color, damage, level) {
             this.isAlive = false;
             this.isFirst = true;
             this.type = type;
@@ -1005,7 +1178,7 @@ var GameObjects;
             this.damage = damage;
             this.isTargeted = false;
             //base constructor
-            _super.call(this, currentX, currentY, canvasWidth, canvasHeight, speed);
+            _super.call(this, currentX, currentY, canvasWidth, canvasHeight, speed, level);
         }
         /**
          * Get lowest X (horizontal) value for rendered projectile
@@ -1088,6 +1261,8 @@ var GameObjects;
             this.gameDate = new Date(Date.now());
             this.currentScore = 0;
             this.highScore = 0;
+            this.directHits = 0;
+            this.shotsFired = 0;
             this.grandMasterScore = 0;
             this.personalRecordDisplayed = false;
             this.grandMasterDisplayed = false;
@@ -1107,6 +1282,17 @@ var GameObjects;
         Score.prototype.isHighScore = function () {
             return (this.currentScore > this.highScore);
         };
+        /**
+         * Calculate efficiency of shots
+         */
+        Score.prototype.getAccuracy = function () {
+            if (this.shotsFired > 0) {
+                return (this.directHits / this.shotsFired) * 100;
+            }
+            else {
+                return 0;
+            }
+        };
         return Score;
     })();
     GameObjects.Score = Score;
@@ -1123,7 +1309,7 @@ var GameObjects;
     })();
     GameObjects.HighScore = HighScore;
     var Message = (function () {
-        function Message(type, text, font, colorRgb1, colorRgb2, x, y) {
+        function Message(type, text, font, colorRgb1, colorRgb2, x, y, expireCount) {
             this.type = type;
             this.text = text;
             this.font = font;
@@ -1131,6 +1317,7 @@ var GameObjects;
             this.colorRgb2 = colorRgb2;
             this.x = x;
             this.y = y;
+            this.expireCount = expireCount;
             //default
             this.isMainColor = false;
             this.renderCount = 0;
@@ -1169,16 +1356,43 @@ var GameObjects;
          * If so, the message should stop appearing.
          */
         Message.prototype.isExpired = function () {
-            if (this.renderCount > CONSTANTS.MESSAGE_EXPIRE_COUNT) {
-                return true;
+            //check if expiration limit set
+            if (this.expireCount > 0) {
+                //see if render count exceeds limit
+                if (this.renderCount > this.expireCount) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
             }
             else {
-                return false;
+                //no limit set, stop rendering when off screen
+                if (this.y < 1) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
             }
         };
         return Message;
     })();
     GameObjects.Message = Message;
+    var ImageObject = (function (_super) {
+        __extends(ImageObject, _super);
+        function ImageObject(positionX, positionY, canvasWidth, canvasHeight) {
+            this.type = Constants.SpriteType.INSTRUCTION_PANEL;
+            //create & assign image
+            var image = new Image();
+            image.src = 'images/InstructionPanel3.png';
+            image.onload = function () { isInstructionPanelLoaded = true; };
+            this.objImage = image;
+            _super.call(this, positionX, positionY, canvasWidth, canvasHeight, 0, 0);
+        }
+        return ImageObject;
+    })(BaseGameObject);
+    GameObjects.ImageObject = ImageObject;
 })(GameObjects || (GameObjects = {}));
 //# sourceMappingURL=GameObjects.js.map/**SPACING**/
 
@@ -1208,7 +1422,10 @@ var GameObjects;
         //start new list
         var bossList = new Array();
         //check for bosses
-        if (currentLevel % CONSTANTS.DEATH_STAR_LEVEL_FACTOR == 0) {
+        if (currentLevel % CONSTANTS.BOUNTY_HUNTER_LEVEL_FACTOR == 0) {
+            addEnemyShips(bossList, 1, Constants.ShipType.BOUNTY_HUNTER, browserWidth, browserHeight, currentLevel);
+        }
+        else if (currentLevel % CONSTANTS.DEATH_STAR_LEVEL_FACTOR == 0) {
             addEnemyShips(bossList, 1, Constants.ShipType.EMPIRE_DEATH_STAR, browserWidth, browserHeight, currentLevel);
         }
         else if (currentLevel % CONSTANTS.COMMANDER_LEVEL_FACTOR == 0) {
@@ -1216,7 +1433,7 @@ var GameObjects;
         }
         //check if boss added
         if (bossList.length > 0) {
-            AddBossMessage(); //notify user
+            Message.AddBossMessage(); //notify user
         }
         return bossList;
     }
@@ -1231,6 +1448,7 @@ var GameObjects;
             switch (type) {
                 case Constants.ShipType.EMPIRE_DEATH_STAR:
                 case Constants.ShipType.EMPIRE_COMMANDER:
+                case Constants.ShipType.BOUNTY_HUNTER:
                     enemyShip = getNewBoss(type, browserWidth, browserHeight, currentLevel);
                     break;
                 default:
@@ -1251,11 +1469,11 @@ var GameObjects;
         var randomTime = addSecondsToDate(Date.now(), (randomSeconds + CONSTANTS.LEVEL_LOAD_BUFFER_SECONDS));
         switch (type) {
             case Constants.ShipType.EMPIRE_DESTROYER:
-                ship = new GameObjects.DestroyerObject(randomX, 0, browserWidth, browserHeight, randomTime);
+                ship = new GameObjects.DestroyerObject(randomX, 0, browserWidth, browserHeight, randomTime, currentLevel);
                 break;
             case Constants.ShipType.EMPIRE_TIE_FIGHTER:
             default:
-                ship = new GameObjects.TieFighterObject(randomX, 0, browserWidth, browserHeight, randomTime);
+                ship = new GameObjects.TieFighterObject(randomX, 0, browserWidth, browserHeight, randomTime, currentLevel);
                 break;
         }
         return ship;
@@ -1272,11 +1490,14 @@ var GameObjects;
         var maxTime = addSecondsToDate(Date.now(), (maxSeconds + CONSTANTS.LEVEL_LOAD_BUFFER_SECONDS));
         switch (type) {
             case Constants.ShipType.EMPIRE_COMMANDER:
-                ship = new GameObjects.CommanderObject(randomX, randomY, browserWidth, browserHeight, maxTime);
+                ship = new GameObjects.CommanderObject(randomX, randomY, browserWidth, browserHeight, maxTime, currentLevel);
+                break;
+            case Constants.ShipType.BOUNTY_HUNTER:
+                ship = new GameObjects.BountyHunterObject(randomX, randomY, browserWidth, browserHeight, maxTime, currentLevel);
                 break;
             case Constants.ShipType.EMPIRE_DEATH_STAR:
             default:
-                ship = new GameObjects.DeathStarObject(randomX, randomY, browserWidth, browserHeight, maxTime);
+                ship = new GameObjects.DeathStarObject(randomX, randomY, browserWidth, browserHeight, maxTime, currentLevel);
                 break;
         }
         return ship;
@@ -1306,11 +1527,11 @@ var GameObjects;
             var radius = CONSTANTS.MISSILE_RADIUS;
             var color = CONSTANTS.MISSLE_PINK;
             var damage = CONSTANTS.MISSILE_DAMAGE;
-            var missile = new GameObjects.Projectile(0, 0, CONSTANTS.MISSILE_SPEED, browserWidth, browserHeight, Constants.ProjectileType.MISSILE, id, 0, radius, color, damage);
+            var missile = new GameObjects.Projectile(0, 0, CONSTANTS.MISSILE_SPEED, browserWidth, browserHeight, Constants.ProjectileType.MISSILE, id, 0, radius, color, damage, currentLevel);
             //add missile
             missileList.push(missile);
             //notify user
-            AddMissileMessage();
+            Message.AddMissileMessage();
         }
     }
     GameLogic.equipMissiles = equipMissiles;
@@ -1324,14 +1545,14 @@ var GameObjects;
             ship.maxHealth += 1;
             ship.health += 1;
             //notify user
-            AddHealthMessage(1);
+            Message.AddHealthMessage(1);
         }
     }
     GameLogic.checkRebelShipHealth = checkRebelShipHealth;
     /**
      * Create list populated with Projectile projects
      */
-    function getPopulatedProjectileList(type, speed, limit, canvasWidth, canvasHeight) {
+    function getPopulatedProjectileList(type, speed, limit, canvasWidth, canvasHeight, currentLevel) {
         var list = new Array();
         var radius = 0;
         var color = '';
@@ -1352,6 +1573,11 @@ var GameObjects;
                 color = CONSTANTS.IMPERIAL_ORANGE;
                 damage = CONSTANTS.IMPERIAL_MISSILE_DAMAGE;
                 break;
+            case Constants.ProjectileType.TURRET_SPRAY:
+                radius = CONSTANTS.TURRET_SPRAY_RADIUS;
+                color = CONSTANTS.TURRET_GREEN;
+                damage = CONSTANTS.TURRET_SPRAY_DAMAGE;
+                break;
             default:
                 radius = CONSTANTS.CANNON_SHOT_RADIUS;
                 color = CONSTANTS.CANNON_SHOT_BLUE;
@@ -1359,7 +1585,7 @@ var GameObjects;
                 break;
         }
         for (var i = 0; i < limit; i++) {
-            list.push(new GameObjects.Projectile(0, 0, speed, canvasWidth, canvasHeight, type, i, 0, radius, color, damage));
+            list.push(new GameObjects.Projectile(0, 0, speed, canvasWidth, canvasHeight, type, i, 0, radius, color, damage, currentLevel));
         }
         return list;
     }
@@ -1394,7 +1620,7 @@ var GameObjects;
     }
     GameLogic.getProjectilesByStatus = getProjectilesByStatus;
     /**
-     * Create new projectile object
+     * Create new projectile object. Returns number of projectiles activated.
      */
     function fireProjectile(list, offset, ship, isTargeted, targetX, targetY) {
         //get id of next available unused projectile
@@ -1406,6 +1632,10 @@ var GameObjects;
             var y = ship.getProjectileLocationStartY(offset);
             //activate projectile
             activateProjectile(id, list, x, y, isTargeted, targetX, targetY);
+            return 1;
+        }
+        else {
+            return 0;
         }
     }
     GameLogic.fireProjectile = fireProjectile;
@@ -1507,6 +1737,7 @@ var GameObjects;
         var font = fontSize.toString() + "px 'Orbitron'";
         var colorRgb1;
         var colorRgb2 = CONSTANTS.FILL_YELLOW;
+        var expireCount = CONSTANTS.MESSAGE_EXPIRE_COUNT;
         switch (type) {
             case Constants.MessageType.ADD_HEALTH:
             case Constants.MessageType.ADD_MISSILE:
@@ -1520,14 +1751,31 @@ var GameObjects;
                 colorRgb1 = CONSTANTS.FILL_ORANGE;
                 colorRgb2 = CONSTANTS.FILL_WHITE;
                 break;
+            case Constants.MessageType.QUOTE:
+                colorRgb1 = CONSTANTS.FILL_YELLOW;
+                colorRgb2 = CONSTANTS.FILL_WHITE;
+                expireCount = 0; //show entire screen
+                break;
             default:
                 colorRgb1 = CONSTANTS.FILL_WHITE;
                 break;
         }
         //add message
-        list.push(new GameObjects.Message(type, text, font, colorRgb1, colorRgb2, startX, startY));
+        list.push(new GameObjects.Message(type, text, font, colorRgb1, colorRgb2, startX, startY, expireCount));
     }
     GameLogic.addNewMessage = addNewMessage;
+    /**
+     * Get current factor of difficulty
+     */
+    function getDifficultyFactor(level) {
+        var factor = 0;
+        var factorLevel = CONSTANTS.ENEMY_STAT_INCREASE_LEVEL;
+        if (level > factorLevel) {
+            factor = Math.floor(factorLevel / level);
+        }
+        return factor;
+    }
+    GameLogic.getDifficultyFactor = getDifficultyFactor;
     /**
      * Check if browser is compliant
      */
@@ -1762,6 +2010,13 @@ var GameObjects;
             }
             //fire projectile
             GameLogic.fireProjectile(list, 0, boss, true, targetX, targetY);
+            //check if multi-shot projectile
+            if (boss.isMultiShot(list[0].type)) {
+                for (var i = 0; i < boss.getNumberOfExtraShots(); i++) {
+                    //fire random projectile
+                    GameLogic.fireProjectile(list, 0, boss, true, GameLogic.getRandomInteger(0, browserWidth), browserHeight);
+                }
+            }
             //set new fire date
             boss.setNewFireTime(timeNow, list[0].type);
         }
@@ -1788,12 +2043,18 @@ var GameObjects;
                 //check if image has been loaded
                 //and if timing is valid
                 if (GameObjects.isShipLoaded(enemyShipList[i].type) && enemyShipList[i].startTimeIsValid(timeNow)) {
+                    //check for entry message
+                    if (enemyShipList[i].showEntryMessage()) {
+                        Message.AddEntryMessage(enemyShipList[i].type);
+                    }
                     //render object
                     canvasContext.drawImage(enemyShipList[i].objImage, enemyShipList[i].getLocationX(), enemyShipList[i].getLocationY());
                     //check for collision
                     if (hasBeenHit(enemyShipList[i], cannonShotList, missileList)) {
                         //add hit animation
                         GameLogic.addHitAnimation(enemyShipList[i], explosionList, browserWidth, browserHeight);
+                        //update score
+                        currentUserScore.directHits += 1;
                         //check if no health left
                         if (enemyShipList[i].health < 1) {
                             //update score
@@ -1993,6 +2254,15 @@ var GameObjects;
         canvasContext.fillText("Grand Master Jedi: " + text, browserWidth / 2, browserHeight / 12);
     }
     Render.drawChampion = drawChampion;
+    function drawInstructionPanel(canvasContext, panel) {
+        if (canvasContext) {
+            if (GameObjects.isSpriteLoaded(panel.type)) {
+                //render object
+                canvasContext.drawImage(panel.objImage, panel.locationX, panel.locationY);
+            }
+        }
+    }
+    Render.drawInstructionPanel = drawInstructionPanel;
 })(Render || (Render = {}));
 //# sourceMappingURL=Render.js.map/**SPACING**/
 
@@ -2014,7 +2284,7 @@ var GameObjects;
         //check for high score
         if (currentUserScore.isHighScore() && !currentUserScore.personalRecordDisplayed) {
             //notify user
-            AddPersonalRecordMessage();
+            Message.AddPersonalRecordMessage();
             //flag that user has been notified
             currentUserScore.personalRecordDisplayed = true;
         }
@@ -2024,19 +2294,6 @@ var GameObjects;
         openLevelCompleteWindow();
     }
     Modal.loadLevelCompleteModal = loadLevelCompleteModal;
-    /**
-     * Get string value from cookie of a specific name
-     */
-    // function getCookieValue(cname:string) {
-    //     var name = cname + "=";
-    //     var ca = document.cookie.split(';');
-    //     for(var i=0; i<ca.length; i++) {
-    //         var c = ca[i];
-    //         while (c.charAt(0)==' ') c = c.substring(1);
-    //         if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
-    //     }
-    //     return "";
-    // }
     /**
      * Get stored high score data
      */
@@ -2087,7 +2344,6 @@ var GameObjects;
      */
     function saveCurrentUserData(name, score) {
         localStorage.setItem(CONSTANTS.DEFAULT_HIGH_SCORE_COOKIE_NAME + name, score.toString());
-        //document.cookie = CONSTANTS.DEFAULT_HIGH_SCORE_COOKIE_NAME + name + "=" + score.toString();
     }
     /**
      * Open Warning Window
@@ -2118,6 +2374,7 @@ var GameObjects;
         if (list.length > 0) {
             //create row
             var titleRow = document.createElement("tr");
+            titleRow.classList.add("highScoreTableHeaderRow");
             //create cells
             var titleCell = document.createElement("td");
             titleCell.colSpan = 3;
@@ -2131,6 +2388,7 @@ var GameObjects;
             table.appendChild(titleRow);
             //create row
             var headerRow = document.createElement("tr");
+            headerRow.classList.add("highScoreHeaderRow");
             //create cells
             var headerCellRank = document.createElement("td");
             //headerCellRank.align = "left";
@@ -2140,7 +2398,7 @@ var GameObjects;
             headerCellName.classList.add("highScoreHeaderName");
             var headerCellScore = document.createElement("td");
             //headerCellScore.align = "left";
-            headerCellName.classList.add("highScoreHeaderScore");
+            headerCellScore.classList.add("highScoreHeaderScore");
             //create text
             var headerRankText = document.createTextNode("RANK");
             var headerNameText = document.createTextNode("NAME");
@@ -2219,94 +2477,6 @@ var GameObjects;
         return Service.getHighScoreList(maxItems);
     }
     /**
-     * Retrieve previous high scores among all users
-     */
-    // function populateHighScoreListObject(list:Array<GameObjects.HighScore>)
-    // {
-    //     var maxItems:number = CONSTANTS.MAX_HIGH_SCORES;
-    //     
-    //     //wipe list
-    //     list.splice(0);
-    //     
-    //     //get high score data
-    //     var values = getHighScoreData();
-    //     
-    //     //ensure not null
-    //     if(values != null)
-    //     {
-    //         //sort from highest to lowest, returns list of keys
-    //         var keysSorted = Object.keys(values).sort(function(a,b){return values[a].score-values[b].score}).reverse();
-    //         //limit scores
-    //         var max:number = keysSorted.length;
-    //         if(max > maxItems) { max = maxItems; }
-    //         var name:string;
-    //         var score:number;
-    //         //use keys to populate global object
-    //         for(var i = 0; i < max; i++)
-    //         {
-    //             name = values[keysSorted[i]].name;
-    //             score = values[keysSorted[i]].score;
-    //             
-    //             if(name != null && score != null)
-    //             {
-    //                 list.push(new GameObjects.HighScore(name,score));
-    //             }
-    //         }
-    //         
-    //         if(list.length > maxItems)
-    //         {
-    //             list.splice((maxItems));
-    //         }
-    //     }
-    //     else
-    //     {
-    //         setDefaultHighScoreData();
-    //     }
-    // }
-    /**
-     * Compare current user score against high score list to see if it needs to be added
-     */
-    // function compareScoreAgainstOtherUsers(userName:string, userScore:number, list:Array<GameObjects.HighScore>)
-    // {
-    //     var hasChanged:boolean = false;
-    //     
-    //     //check if list is small / non-existent
-    //     if(list.length < 3)
-    //     {
-    //         //just add
-    //         list.push(new GameObjects.HighScore(userName, userName.replace(' ',''), userScore));
-    //         //flag change
-    //         hasChanged = true;
-    //     }
-    //     else
-    //     {
-    //         //loop through list
-    //         //should be sorted from highest to lowest
-    //         for(var i = 0; i < list.length; i++)
-    //         {
-    //             //check if user exceeded this score
-    //             if(!hasChanged && userScore > list[i].score)
-    //             {
-    //                 //insert
-    //                 list.splice(i, 0, new GameObjects.HighScore(userName, userName.replace(' ',''), userScore));
-    //                 //flag change
-    //                 hasChanged = true;
-    //                 break;
-    //             }
-    //         }
-    //     }
-    //     
-    //     //check if list has changed
-    //     if(hasChanged)
-    //     {
-    //         //store
-    //         setHighScoreData(list);
-    //         
-    //         //populate again to sort
-    //         list = populateHighScoreListObject();
-    //     }
-    // }
-    /**
      * Load Modal that notifies user that the level is complete
      */
     function loadGameOverModal(currentUserScore, currentLevel) {
@@ -2349,8 +2519,6 @@ var GameObjects;
             //show updated high score list
             displayHighScoreData(list, divName);
         }
-        //compare score against other high scores
-        //compareScoreAgainstOtherUsers(score.name, score.currentScore, list);
     }
     Modal.checkUserScore = checkUserScore;
     /**
@@ -2410,6 +2578,95 @@ var GameObjects;
 })(Modal || (Modal = {}));
 //# sourceMappingURL=Modal.js.map/**SPACING**/
 
+/**SPACING**/var Message;
+(function (Message) {
+    var DeathStarMessageList = ["You underestimate the power of the dark side!",
+        "You underestimate my power!",
+        "Give yourself to the Dark Side!",
+        "You can not disguise yourself from me, Jedi!"];
+    var CommanderMessageList = ["If you will not be turned, you will be destroyed!",
+        "Your feeble skills are no match for the power of the Dark Side!",
+        "Now you will pay the price for your lack of vision!",
+        "Your faith in your friends is your weakness!"];
+    var BountyHunterMessageList = ["Always a pleasure to meet a Jedi",
+        "All is proceeding as you wished, Lord Vader",
+        "Now let me show you the true power of a Mandalorian!",
+        "Your arrogance is the cause of your destruction, not me"];
+    function GetMessageLocationX() {
+        return (browserWidth / 2);
+    }
+    function GetMessageLocationY() {
+        return (browserHeight - (rebelShip.objImage.naturalHeight * 2));
+    }
+    function GetQuoteLocationX() {
+        return (browserWidth / 2);
+    }
+    function GetQuoteLocationY() {
+        return (browserHeight / 2);
+    }
+    /**
+     * Create catchphrase message for boss to render
+     */
+    function AddEntryMessage(type) {
+        //only 4 message entries per list, grab random index
+        var index = Math.floor(Math.random() * 4);
+        switch (type) {
+            case Constants.ShipType.EMPIRE_DEATH_STAR:
+                AddQuoteMessage(DeathStarMessageList[index]);
+                break;
+            case Constants.ShipType.EMPIRE_COMMANDER:
+                AddQuoteMessage(CommanderMessageList[index]);
+                break;
+            case Constants.ShipType.BOUNTY_HUNTER:
+                AddQuoteMessage(BountyHunterMessageList[index]);
+                break;
+        }
+    }
+    Message.AddEntryMessage = AddEntryMessage;
+    function AddQuoteMessage(text) {
+        //add message
+        GameLogic.addNewMessage(messageList, Constants.MessageType.QUOTE, text, GetQuoteLocationX(), GetQuoteLocationY(), 24);
+    }
+    function AddGameStartMessage() {
+        //add message
+        GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "*** START GAME ***", GetMessageLocationX(), GetMessageLocationY(), 32);
+    }
+    Message.AddGameStartMessage = AddGameStartMessage;
+    function AddHealthMessage(amount) {
+        //add message
+        GameLogic.addNewMessage(messageList, Constants.MessageType.ADD_HEALTH, "+" + amount.toString() + " Health", GetMessageLocationX(), GetMessageLocationY(), 24);
+    }
+    Message.AddHealthMessage = AddHealthMessage;
+    function AddMissileMessage() {
+        //add message
+        GameLogic.addNewMessage(messageList, Constants.MessageType.ADD_MISSILE, "+1 Missile", GetMessageLocationX(), GetMessageLocationY(), 24);
+    }
+    Message.AddMissileMessage = AddMissileMessage;
+    function AddBossMessage() {
+        //add message
+        GameLogic.addNewMessage(messageList, Constants.MessageType.NEW_BOSS, "^^^ BOSS DETECTED ^^^", GetMessageLocationX(), GetMessageLocationY(), 32);
+    }
+    Message.AddBossMessage = AddBossMessage;
+    function AddPersonalRecordMessage() {
+        //add message
+        GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "*** PERSONAL RECORD ***", GetMessageLocationX(), GetMessageLocationY(), 32);
+    }
+    Message.AddPersonalRecordMessage = AddPersonalRecordMessage;
+    function AddPressSpacebarMessage() {
+        //add message
+        GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "*** PRESS SPACEBAR TO START ***", GetMessageLocationX(), GetMessageLocationY(), 32);
+    }
+    Message.AddPressSpacebarMessage = AddPressSpacebarMessage;
+    function AddNewHighScoreMessage() {
+        //add message
+        GameLogic.addNewMessage(messageList, Constants.MessageType.HIGH_SCORE, "!!! NEW HIGH SCORE !!!", GetMessageLocationX(), GetMessageLocationY(), 40);
+        //add message
+        GameLogic.addNewMessage(messageList, Constants.MessageType.HIGH_SCORE, "### JEDI GRAND MASTER ###", GetMessageLocationX(), GetMessageLocationY(), 40);
+    }
+    Message.AddNewHighScoreMessage = AddNewHighScoreMessage;
+})(Message || (Message = {}));
+//# sourceMappingURL=Message.js.map/**SPACING**/
+
 /**SPACING**//*
 Sources:
 https://developer.mozilla.org/en-US/docs/Games/Workflows/2D_Breakout_game_pure_JavaScript
@@ -2441,9 +2698,16 @@ gameCanvas.width = browserWidth;
 gameCanvas.height = browserHeight;
 //add canvas to page
 document.body.appendChild(gameCanvas);
+/*** INITIALIZE GAME MGMT VARS ***/
+var intervalHolder = null;
+var atStartScreen = true;
+var isGameReady = false;
+var currentLevel = CONSTANTS.DEFAULT_START_LEVEL;
+var timePrevious = Date.now();
+var titleTimePrevious = 0;
 /*** INITIALIZE GAME OBJECTS ***/
 //user controlled ship
-var rebelShip = new GameObjects.RebelShipObject(browserWidth, browserHeight);
+var rebelShip = new GameObjects.RebelShipObject(browserWidth, browserHeight, currentLevel);
 //list of explosion sprites
 var explosionList = new Array();
 //list to store message to user
@@ -2452,22 +2716,15 @@ var messageList = new Array();
 var enemyShipList = new Array();
 var bossList = new Array();
 //list of cannon shots
-var cannonShotList = GameLogic.getPopulatedProjectileList(Constants.ProjectileType.CANNON_SHOT, CONSTANTS.CANNON_SHOT_SPEED, CONSTANTS.CANNON_SHOT_LIMIT, gameCanvas.width, gameCanvas.height);
+var cannonShotList = GameLogic.getPopulatedProjectileList(Constants.ProjectileType.CANNON_SHOT, CONSTANTS.CANNON_SHOT_SPEED, CONSTANTS.CANNON_SHOT_LIMIT, gameCanvas.width, gameCanvas.height, currentLevel);
 //list of missiles
-var missileList = GameLogic.getPopulatedProjectileList(Constants.ProjectileType.MISSILE, CONSTANTS.MISSILE_SPEED, CONSTANTS.MISSILE_LIMIT, gameCanvas.width, gameCanvas.height);
+var missileList = GameLogic.getPopulatedProjectileList(Constants.ProjectileType.MISSILE, CONSTANTS.MISSILE_SPEED, CONSTANTS.MISSILE_LIMIT, gameCanvas.width, gameCanvas.height, currentLevel);
 //manage user input controls
 var rightArrowKeyed = false;
 var leftArrowKeyed = false;
 //bind keyboard event handlers
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
-//init game mgmt vars
-var intervalHolder = null;
-var atStartScreen = true;
-var isGameReady = false;
-var currentLevel = CONSTANTS.DEFAULT_START_LEVEL;
-var timePrevious = Date.now();
-var titleTimePrevious = 0;
 //init user stats
 var currentUserScore = new GameObjects.Score("Anonymous", CONSTANTS.DEFAULT_START_LEVEL);
 //var highScoreList:Array<GameObjects.HighScore> = new Array<GameObjects.HighScore>();
@@ -2475,6 +2732,8 @@ var champion = Service.getChampion();
 //init theme song
 var titleThemeSong = new Audio("sounds/MainThemeWhistle.mp3");
 titleThemeSong.loop = true;
+//init instruction panel
+var instructionPanel = new GameObjects.ImageObject(0, 0, browserWidth, browserHeight);
 //check browser
 if (GameLogic.isCompliantBrowser()) {
     //check if start screen showing
@@ -2519,23 +2778,23 @@ function continueGame() {
  * Reset game state and advance to next level
  */
 function startOver() {
-    //reset ship
-    rebelShip = new GameObjects.RebelShipObject(browserWidth, browserHeight);
-    //game active
-    isGameReady = true;
     //increment new level
     currentLevel = CONSTANTS.DEFAULT_START_LEVEL;
+    //reset ship
+    rebelShip = new GameObjects.RebelShipObject(browserWidth, browserHeight, currentLevel);
+    //game active
+    isGameReady = true;
     //reset objects
     resetObjects();
     //reset score
     currentUserScore.levelStart = currentLevel;
     currentUserScore.currentScore = 0;
     //reset missile limit
-    missileList = GameLogic.getPopulatedProjectileList(Constants.ProjectileType.MISSILE, CONSTANTS.MISSILE_SPEED, CONSTANTS.MISSILE_LIMIT, gameCanvas.width, gameCanvas.height);
+    missileList = GameLogic.getPopulatedProjectileList(Constants.ProjectileType.MISSILE, CONSTANTS.MISSILE_SPEED, CONSTANTS.MISSILE_LIMIT, gameCanvas.width, gameCanvas.height, currentLevel);
     //create enemies for this level
     loadEnemies();
     //notify user
-    AddGameStartMessage();
+    Message.AddGameStartMessage();
     //reset time var
     timePrevious = Date.now();
 }
@@ -2566,42 +2825,6 @@ function resetObjects() {
     leftArrowKeyed = false;
     //reset messages
     messageList.splice(0);
-}
-function GetMessageLocationX() {
-    return (browserWidth / 2);
-}
-function GetMessageLocationY() {
-    return (browserHeight - (rebelShip.objImage.naturalHeight * 2));
-}
-function AddGameStartMessage() {
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "*** START GAME ***", GetMessageLocationX(), GetMessageLocationY(), 32);
-}
-function AddHealthMessage(amount) {
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.ADD_HEALTH, "+" + amount.toString() + " Health", GetMessageLocationX(), GetMessageLocationY(), 24);
-}
-function AddMissileMessage() {
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.ADD_MISSILE, "+1 Missile", GetMessageLocationX(), GetMessageLocationY(), 24);
-}
-function AddBossMessage() {
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.NEW_BOSS, "^^^ BOSS DETECTED ^^^", GetMessageLocationX(), GetMessageLocationY(), 32);
-}
-function AddPersonalRecordMessage() {
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "*** PERSONAL RECORD ***", GetMessageLocationX(), GetMessageLocationY(), 32);
-}
-function AddPressSpacebarMessage() {
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "*** PRESS SPACEBAR TO START ***", GetMessageLocationX(), GetMessageLocationY(), 32);
-}
-function AddNewHighScoreMessage() {
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.HIGH_SCORE, "!!! NEW HIGH SCORE !!!", GetMessageLocationX(), GetMessageLocationY(), 40);
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.HIGH_SCORE, "### JEDI GRAND MASTER ###", GetMessageLocationX(), GetMessageLocationY(), 40);
 }
 /**
  * Get amount of enemy ships remaining
@@ -2651,7 +2874,7 @@ function keyHandler(isDown, event) {
             {
                 //check if key up
                 if (!isDown) {
-                    GameLogic.fireProjectile(cannonShotList, CONSTANTS.CANNON_SHOT_OFFSET_Y, rebelShip, false, 0, 0); //add new shot
+                    currentUserScore.shotsFired += GameLogic.fireProjectile(cannonShotList, CONSTANTS.CANNON_SHOT_OFFSET_Y, rebelShip, false, 0, 0); //add new shot
                 }
                 break;
             }
@@ -2659,7 +2882,7 @@ function keyHandler(isDown, event) {
             {
                 //check if key up
                 if (!isDown) {
-                    GameLogic.fireProjectile(missileList, CONSTANTS.MISSILE_OFFSET_Y, rebelShip, false, 0, 0); //add new missile
+                    currentUserScore.shotsFired += GameLogic.fireProjectile(missileList, CONSTANTS.MISSILE_OFFSET_Y, rebelShip, false, 0, 0); //add new missile
                 }
                 break;
             }
@@ -2702,7 +2925,7 @@ function startGame() {
     //create enemies for this level
     loadEnemies();
     //notify user
-    AddGameStartMessage();
+    Message.AddGameStartMessage();
     //init game state vars
     timePrevious = Date.now();
     //start main loop
@@ -2786,7 +3009,7 @@ function showStartScreen() {
     Render.moveEnemyShips(titleDelta, titleTimeNow, enemyShipList);
     //check if no messages
     if (messageList.length == 0) {
-        AddPressSpacebarMessage(); //add new
+        Message.AddPressSpacebarMessage(); //add new
     }
     //check if no enemies left
     if (enemyShipList.length == 0) {
@@ -2794,6 +3017,8 @@ function showStartScreen() {
     }
     //render title
     Render.drawTitle(canvasContext);
+    //render title
+    Render.drawInstructionPanel(canvasContext, instructionPanel);
     //render high score
     Render.drawChampion(canvasContext, champion);
     //render any messages

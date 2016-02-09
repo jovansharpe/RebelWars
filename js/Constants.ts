@@ -23,14 +23,18 @@ module Constants {
         MISSILE_RADIUS:number = 6;
         MISSILE_OFFSET_Y = -2;
         IMPERIAL_SHOT_RADIUS:number = 4;
-        IMPERIAL_MISSILE_RADIUS:number = 10;
+        IMPERIAL_MISSILE_RADIUS:number = 8;
+        TURRET_SPRAY_RADIUS:number = 4;
         DEATH_STAR_PROJECTILE_OFFSET_X:number = 93;
         DEATH_STAR_PROJECTILE_OFFSET_Y:number = 82;
+        BOUNTY_HUNTER_PROJECTILE_OFFSET_X:number = 50;
+        BOUNTY_HUNTER_PROJECTILE_OFFSET_Y:number = 100;
         DESTROYER_HEIGHT_HIT_FACTOR = 2;
         REBEL_SHIP_HEIGHT_HIT_FACTOR = 2;
         TIE_FIGHTER_HEIGHT_HIT_FACTOR = 2;
         COMMANDER_HEIGHT_HIT_FACTOR = 2;
         DEATH_STAR_HEIGHT_HIT_FACTOR = 2;
+        BOUNTY_HUNTER_HEIGHT_HIT_FACTOR = 2;
         MESSAGE_RISE_FACTOR_Y = 1;
         MESSAGE_EXPIRE_COUNT = 175;
         MESSAGE_THROTTLE_COUNT = 50; 
@@ -41,16 +45,22 @@ module Constants {
         COMMANDER_IMPERIAL_SHOT_FIRE_RATE = 0.5;
         DEATH_STAR_IMPERIAL_SHOT_LIMIT = 10;
         DEATH_STAR_IMPERIAL_SHOT_FIRE_RATE = 1;
-        DEATH_STAR_IMPERIAL_MISSILE_LIMIT = 1;
-        DEATH_STAR_IMPERIAL_MISSILE_FIRE_RATE = 3;
+        DEATH_STAR_IMPERIAL_MISSILE_LIMIT = 2;
+        DEATH_STAR_IMPERIAL_MISSILE_FIRE_RATE = 1;
+        DEATH_STAR_NUM_MULTI_SHOT = 1;
+        BOUNTY_HUNTER_TURRET_SPRAY_LIMIT = 12;
+        BOUNTY_HUNTER_TURRET_SPRAY_FIRE_RATE = 1;
+        BOUNTY_HUNTER_NUM_MULTI_SHOT = 2;
         NUM_FIGHTERS_PER_LEVEL = 3;
         NUM_DESTROYERS_PER_LEVEL = 1;
         MAX_SECONDS_MULTIPLIER_PER_LEVEL = 10;
         LEVEL_LOAD_BUFFER_SECONDS = 2;
         COMMANDER_LEVEL_FACTOR = 3;
         DEATH_STAR_LEVEL_FACTOR = 5;
+        BOUNTY_HUNTER_LEVEL_FACTOR = 7;
         ADD_MISSILE_LEVEL = 3;
         ADD_HEALTH_LEVEL = 5;
+        ENEMY_STAT_INCREASE_LEVEL = 10;
         //speeds
         BASE_SPEED:number = 256;
         REBEL_SHIP_SPEED:number = this.BASE_SPEED;
@@ -58,15 +68,18 @@ module Constants {
         DESTROYER_SPEED:number = (this.BASE_SPEED / 6);
         CANNON_SHOT_SPEED:number = this.BASE_SPEED;
         MISSILE_SPEED:number = (this.BASE_SPEED / 2);
-        COMMANDER_SPEED:number = (this.BASE_SPEED / 6);
-        DEATH_STAR_SPEED:number = (this.BASE_SPEED / 10);
+        COMMANDER_SPEED:number = (this.BASE_SPEED / 4);
+        DEATH_STAR_SPEED:number = (this.BASE_SPEED / 6);
+        BOUNTY_HUNTER_SPEED:number = (this.BASE_SPEED / 1);
+        TURRET_SPRAY_SPEED:number = this.BASE_SPEED;
         IMPERIAL_SHOT_SPEED:number = this.BASE_SPEED;
         IMPERIAL_MISSILE_SPEED:number = (this.BASE_SPEED / 2);
         //colors
-        CANNON_SHOT_BLUE:string = 'CANNON_BLUE';
+        CANNON_SHOT_BLUE:string = 'CANNON_SHOT_BLUE';
         MISSLE_PINK:string = 'MISSLE_PINK';
         IMPERIAL_RED:string = 'IMPERIAL_RED';
         IMPERIAL_ORANGE:string = 'IMPERIAL_ORANGE';
+        TURRET_GREEN:string = 'TURRET_GREEN';
         WHITE:string = 'WHITE';
         FILL_WHITE:string = 'rgb(250, 250, 250)';
         FILL_YELLOW:string = 'rgb(239, 255, 0)';
@@ -79,11 +92,13 @@ module Constants {
         CANNON_SHOT_DAMAGE:number = 1;
         IMPERIAL_SHOT_DAMAGE:number = 1;
         IMPERIAL_MISSILE_DAMAGE:number = 3;
+        TURRET_SPRAY_DAMAGE:number = 1;
         MISSILE_DAMAGE:number = 5;
         TIE_FIGHTER_HEALTH:number = 1;
         DESTROYER_HEALTH:number = 5;
         COMMANDER_HEALTH:number = 20;
         DEATH_STAR_HEALTH:number = 50;
+        BOUNTY_HUNTER_HEALTH:number = 30;
         REBEL_SHIP_HEALTH:number = 3;
         //directions
         DEFAULT_DIRECTION_CHANGE_SECONDS = 5;
@@ -100,6 +115,8 @@ module Constants {
                     return '#FF0000';
                 case this.IMPERIAL_ORANGE:
                     return '#ffbf00';
+                case this.TURRET_GREEN:
+                    return '#00ff00';
                 case this.WHITE:
                 default:
                 {
@@ -123,6 +140,8 @@ module Constants {
                 return "Tie Fighter";
             case ShipType.REBEL_MILLENIUM_FALCON:
                 return "Millenium Falcon";
+            case ShipType.BOUNTY_HUNTER:
+                return "Boba Fett";
             default:
             {
                 return type.toString();
@@ -134,7 +153,8 @@ module Constants {
         CANNON_SHOT,
         MISSILE,
         IMPERIAL_SHOT,
-        IMPERIAL_MISSILE
+        IMPERIAL_MISSILE,
+        TURRET_SPRAY
     }
 
     export enum ShipType  {
@@ -142,12 +162,14 @@ module Constants {
         EMPIRE_TIE_FIGHTER,
         EMPIRE_DESTROYER,
         EMPIRE_COMMANDER,
-        EMPIRE_DEATH_STAR
+        EMPIRE_DEATH_STAR,
+        BOUNTY_HUNTER
     }
     
     export enum SpriteType {
         EXPLOSION_SMALL,
-        EXPLOSION_LARGE
+        EXPLOSION_LARGE,
+        INSTRUCTION_PANEL
     }
     
     export enum Direction {
@@ -162,7 +184,8 @@ module Constants {
         ADD_MISSILE,
         ADD_HEALTH,
         NEW_BOSS,
-        HIGH_SCORE
+        HIGH_SCORE,
+        QUOTE
     }
 }
 

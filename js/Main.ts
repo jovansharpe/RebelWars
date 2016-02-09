@@ -35,10 +35,18 @@ gameCanvas.height = browserHeight;
 //add canvas to page
 document.body.appendChild(gameCanvas);
 
+/*** INITIALIZE GAME MGMT VARS ***/
+var intervalHolder:number = null;
+var atStartScreen:boolean = true;
+var isGameReady:boolean = false;
+var currentLevel:number = CONSTANTS.DEFAULT_START_LEVEL;
+var timePrevious:number = Date.now();
+var titleTimePrevious:number = 0;
+
 /*** INITIALIZE GAME OBJECTS ***/
 
 //user controlled ship
-var rebelShip:GameObjects.RebelShipObject = new GameObjects.RebelShipObject(browserWidth, browserHeight);
+var rebelShip:GameObjects.RebelShipObject = new GameObjects.RebelShipObject(browserWidth, browserHeight, currentLevel);
 
 //list of explosion sprites
 var explosionList:Array<GameObjects.SpriteSheetObject> = new Array<GameObjects.SpriteSheetObject>();
@@ -55,14 +63,16 @@ var cannonShotList:Array<GameObjects.Projectile> = GameLogic.getPopulatedProject
 CONSTANTS.CANNON_SHOT_SPEED,
 CONSTANTS.CANNON_SHOT_LIMIT,
 gameCanvas.width,
-gameCanvas.height);
+gameCanvas.height,
+currentLevel);
 
 //list of missiles
 var missileList:Array<GameObjects.Projectile> = GameLogic.getPopulatedProjectileList(Constants.ProjectileType.MISSILE, 
 CONSTANTS.MISSILE_SPEED,
 CONSTANTS.MISSILE_LIMIT,
 gameCanvas.width,
-gameCanvas.height);
+gameCanvas.height,
+currentLevel);
 
 //manage user input controls
 var rightArrowKeyed = false;
@@ -72,14 +82,6 @@ var leftArrowKeyed = false;
 document.addEventListener("keydown",keyDownHandler,false);
 document.addEventListener("keyup",keyUpHandler,false);
 
-//init game mgmt vars
-var intervalHolder:number = null;
-var atStartScreen:boolean = true;
-var isGameReady:boolean = false;
-var currentLevel:number = CONSTANTS.DEFAULT_START_LEVEL;
-var timePrevious:number = Date.now();
-var titleTimePrevious:number = 0;
-
 //init user stats
 var currentUserScore:GameObjects.Score = new GameObjects.Score("Anonymous",CONSTANTS.DEFAULT_START_LEVEL);
 //var highScoreList:Array<GameObjects.HighScore> = new Array<GameObjects.HighScore>();
@@ -88,6 +90,8 @@ var champion:string = Service.getChampion();
 //init theme song
 var titleThemeSong:HTMLAudioElement = new Audio("sounds/MainThemeWhistle.mp3");
 titleThemeSong.loop = true;
+//init instruction panel
+var instructionPanel:GameObjects.ImageObject = new GameObjects.ImageObject(0,0,browserWidth,browserHeight);
 
 //check browser
 if(GameLogic.isCompliantBrowser())
@@ -150,14 +154,14 @@ function continueGame()
  */
 function startOver()
 {   
+    //increment new level
+    currentLevel = CONSTANTS.DEFAULT_START_LEVEL;
+    
     //reset ship
-    rebelShip = new GameObjects.RebelShipObject(browserWidth, browserHeight);
+    rebelShip = new GameObjects.RebelShipObject(browserWidth, browserHeight, currentLevel);
     
     //game active
     isGameReady = true;
-    
-    //increment new level
-    currentLevel = CONSTANTS.DEFAULT_START_LEVEL;
     
     //reset objects
     resetObjects();
@@ -171,13 +175,14 @@ function startOver()
         CONSTANTS.MISSILE_SPEED,
         CONSTANTS.MISSILE_LIMIT,
         gameCanvas.width,
-        gameCanvas.height);
+        gameCanvas.height,
+        currentLevel);
     
     //create enemies for this level
     loadEnemies();
     
     //notify user
-    AddGameStartMessage();
+    Message.AddGameStartMessage();
     
     //reset time var
     timePrevious = Date.now();
@@ -221,68 +226,7 @@ function resetObjects()
     messageList.splice(0);
 }
 
-function GetMessageLocationX() : number
-{
-    return (browserWidth / 2);
-}
 
-function GetMessageLocationY() : number
-{
-    return (browserHeight - (rebelShip.objImage.naturalHeight * 2));
-}
-
-function AddGameStartMessage() : void
-{
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "*** START GAME ***", 
-        GetMessageLocationX(), GetMessageLocationY(), 32);
-}
-
-function AddHealthMessage(amount:number) : void
-{
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.ADD_HEALTH, "+" + amount.toString() + " Health", 
-        GetMessageLocationX(), GetMessageLocationY(), 24);
-}
-
-function AddMissileMessage() : void
-{
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.ADD_MISSILE, "+1 Missile", 
-        GetMessageLocationX(), GetMessageLocationY(), 24);
-}
-
-function AddBossMessage() : void
-{
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.NEW_BOSS, "^^^ BOSS DETECTED ^^^", 
-        GetMessageLocationX(), GetMessageLocationY(), 32);
-}
-
-function AddPersonalRecordMessage() : void
-{
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "*** PERSONAL RECORD ***", 
-        GetMessageLocationX(), GetMessageLocationY(), 32);
-}
-
-function AddPressSpacebarMessage() : void
-{
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "*** PRESS SPACEBAR TO START ***", 
-        GetMessageLocationX(), GetMessageLocationY(), 32);
-}
-
-function AddNewHighScoreMessage() : void
-{
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.HIGH_SCORE, "!!! NEW HIGH SCORE !!!", 
-        GetMessageLocationX(), GetMessageLocationY(), 40);
-        
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.HIGH_SCORE, "### JEDI GRAND MASTER ###", 
-        GetMessageLocationX(), GetMessageLocationY(), 40);
-}
 
 /**
  * Get amount of enemy ships remaining
@@ -348,7 +292,7 @@ function keyHandler(isDown:boolean, event:KeyboardEvent)
             //check if key up
             if(!isDown)
             {
-                GameLogic.fireProjectile(cannonShotList, CONSTANTS.CANNON_SHOT_OFFSET_Y, rebelShip,
+                currentUserScore.shotsFired += GameLogic.fireProjectile(cannonShotList, CONSTANTS.CANNON_SHOT_OFFSET_Y, rebelShip,
                     false, 0, 0); //add new shot
             }
             break;
@@ -358,7 +302,7 @@ function keyHandler(isDown:boolean, event:KeyboardEvent)
             //check if key up
             if(!isDown)
             {
-                GameLogic.fireProjectile(missileList, CONSTANTS.MISSILE_OFFSET_Y, rebelShip,
+                currentUserScore.shotsFired += GameLogic.fireProjectile(missileList, CONSTANTS.MISSILE_OFFSET_Y, rebelShip,
                     false, 0, 0); //add new missile
             }
             break;
@@ -409,7 +353,7 @@ function startGame()
     loadEnemies();
 
     //notify user
-    AddGameStartMessage();
+    Message.AddGameStartMessage();
 
     //init game state vars
     timePrevious = Date.now();
@@ -522,7 +466,7 @@ function showStartScreen() {
     //check if no messages
     if(messageList.length == 0)
     {
-        AddPressSpacebarMessage(); //add new
+        Message.AddPressSpacebarMessage(); //add new
     }
     
     //check if no enemies left
@@ -533,6 +477,9 @@ function showStartScreen() {
     
     //render title
     Render.drawTitle(canvasContext);
+    
+    //render title
+    Render.drawInstructionPanel(canvasContext, instructionPanel);
     
     //render high score
     Render.drawChampion(canvasContext, champion);

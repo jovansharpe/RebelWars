@@ -21,7 +21,7 @@ module Modal {
         if(currentUserScore.isHighScore() && !currentUserScore.personalRecordDisplayed)
         {
             //notify user
-            AddPersonalRecordMessage();
+            Message.AddPersonalRecordMessage();
             
             //flag that user has been notified
             currentUserScore.personalRecordDisplayed = true;
@@ -33,20 +33,6 @@ module Modal {
         //open window
         openLevelCompleteWindow(); 
     }
-
-    /**
-     * Get string value from cookie of a specific name
-     */
-    // function getCookieValue(cname:string) {
-    //     var name = cname + "=";
-    //     var ca = document.cookie.split(';');
-    //     for(var i=0; i<ca.length; i++) {
-    //         var c = ca[i];
-    //         while (c.charAt(0)==' ') c = c.substring(1);
-    //         if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
-    //     }
-    //     return "";
-    // }
 
     /**
      * Get stored high score data
@@ -116,8 +102,6 @@ module Modal {
     function saveCurrentUserData(name:string, score:number)
     {
         localStorage.setItem(CONSTANTS.DEFAULT_HIGH_SCORE_COOKIE_NAME + name, score.toString());
-        
-        //document.cookie = CONSTANTS.DEFAULT_HIGH_SCORE_COOKIE_NAME + name + "=" + score.toString();
     }
 
     /**
@@ -157,6 +141,7 @@ module Modal {
         {
             //create row
             var titleRow:HTMLTableRowElement = <HTMLTableRowElement>document.createElement("tr");
+            titleRow.classList.add("highScoreTableHeaderRow");
             //create cells
             var titleCell:HTMLTableCellElement = <HTMLTableCellElement>document.createElement("td");
             titleCell.colSpan = 3;
@@ -171,6 +156,7 @@ module Modal {
             
             //create row
             var headerRow:HTMLTableRowElement = <HTMLTableRowElement>document.createElement("tr");
+            headerRow.classList.add("highScoreHeaderRow");
             //create cells
             var headerCellRank:HTMLTableCellElement = <HTMLTableCellElement>document.createElement("td");
             //headerCellRank.align = "left";
@@ -180,7 +166,7 @@ module Modal {
             headerCellName.classList.add("highScoreHeaderName");
             var headerCellScore:HTMLTableCellElement = <HTMLTableCellElement>document.createElement("td");
             //headerCellScore.align = "left";
-            headerCellName.classList.add("highScoreHeaderScore");
+            headerCellScore.classList.add("highScoreHeaderScore");
             //create text
             var headerRankText:Text = <Text>document.createTextNode("RANK");
             var headerNameText:Text = <Text>document.createTextNode("NAME");
@@ -270,96 +256,6 @@ module Modal {
         //get high score list
         return Service.getHighScoreList(maxItems);
     }
-    
-    /**
-     * Retrieve previous high scores among all users
-     */
-    // function populateHighScoreListObject(list:Array<GameObjects.HighScore>)
-    // {
-    //     var maxItems:number = CONSTANTS.MAX_HIGH_SCORES;
-    //     
-    //     //wipe list
-    //     list.splice(0);
-    //     
-    //     //get high score data
-    //     var values = getHighScoreData();
-    //     
-    //     //ensure not null
-    //     if(values != null)
-    //     {
-    //         //sort from highest to lowest, returns list of keys
-    //         var keysSorted = Object.keys(values).sort(function(a,b){return values[a].score-values[b].score}).reverse();
-    //         //limit scores
-    //         var max:number = keysSorted.length;
-    //         if(max > maxItems) { max = maxItems; }
-    //         var name:string;
-    //         var score:number;
-    //         //use keys to populate global object
-    //         for(var i = 0; i < max; i++)
-    //         {
-    //             name = values[keysSorted[i]].name;
-    //             score = values[keysSorted[i]].score;
-    //             
-    //             if(name != null && score != null)
-    //             {
-    //                 list.push(new GameObjects.HighScore(name,score));
-    //             }
-    //         }
-    //         
-    //         if(list.length > maxItems)
-    //         {
-    //             list.splice((maxItems));
-    //         }
-    //     }
-    //     else
-    //     {
-    //         setDefaultHighScoreData();
-    //     }
-    // }
-    
-    /**
-     * Compare current user score against high score list to see if it needs to be added
-     */
-    // function compareScoreAgainstOtherUsers(userName:string, userScore:number, list:Array<GameObjects.HighScore>)
-    // {
-    //     var hasChanged:boolean = false;
-    //     
-    //     //check if list is small / non-existent
-    //     if(list.length < 3)
-    //     {
-    //         //just add
-    //         list.push(new GameObjects.HighScore(userName, userName.replace(' ',''), userScore));
-    //         //flag change
-    //         hasChanged = true;
-    //     }
-    //     else
-    //     {
-    //         //loop through list
-    //         //should be sorted from highest to lowest
-    //         for(var i = 0; i < list.length; i++)
-    //         {
-    //             //check if user exceeded this score
-    //             if(!hasChanged && userScore > list[i].score)
-    //             {
-    //                 //insert
-    //                 list.splice(i, 0, new GameObjects.HighScore(userName, userName.replace(' ',''), userScore));
-    //                 //flag change
-    //                 hasChanged = true;
-    //                 break;
-    //             }
-    //         }
-    //     }
-    //     
-    //     //check if list has changed
-    //     if(hasChanged)
-    //     {
-    //         //store
-    //         setHighScoreData(list);
-    //         
-    //         //populate again to sort
-    //         list = populateHighScoreListObject();
-    //     }
-    // }
 
     /**
      * Load Modal that notifies user that the level is complete
@@ -416,8 +312,6 @@ module Modal {
             displayHighScoreData(list, divName);
         }
         
-        //compare score against other high scores
-        //compareScoreAgainstOtherUsers(score.name, score.currentScore, list);
     }
 
     /**

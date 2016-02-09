@@ -36,7 +36,12 @@ module GameLogic {
         var bossList:Array<GameObjects.BossShipObject> = new Array<GameObjects.BossShipObject>();
         
         //check for bosses
-        if( currentLevel % CONSTANTS.DEATH_STAR_LEVEL_FACTOR == 0 )
+        if( currentLevel % CONSTANTS.BOUNTY_HUNTER_LEVEL_FACTOR == 0 )
+        {
+            addEnemyShips(bossList, 1, Constants.ShipType.BOUNTY_HUNTER, 
+                browserWidth, browserHeight, currentLevel);
+        }
+        else if( currentLevel % CONSTANTS.DEATH_STAR_LEVEL_FACTOR == 0 )
         {
             addEnemyShips(bossList, 1, Constants.ShipType.EMPIRE_DEATH_STAR, 
                 browserWidth, browserHeight, currentLevel);
@@ -50,7 +55,7 @@ module GameLogic {
         //check if boss added
         if(bossList.length > 0)
         {
-            AddBossMessage(); //notify user
+            Message.AddBossMessage(); //notify user
         }
         
         return bossList;
@@ -71,6 +76,7 @@ module GameLogic {
             {
                 case Constants.ShipType.EMPIRE_DEATH_STAR:
                 case Constants.ShipType.EMPIRE_COMMANDER:
+                case Constants.ShipType.BOUNTY_HUNTER:
                    enemyShip = getNewBoss(type, browserWidth, browserHeight, currentLevel);
                 break;
                 default:
@@ -96,11 +102,11 @@ module GameLogic {
         switch(type)
         {
             case Constants.ShipType.EMPIRE_DESTROYER:
-                ship = new GameObjects.DestroyerObject(randomX,0,browserWidth, browserHeight, randomTime);
+                ship = new GameObjects.DestroyerObject(randomX,0,browserWidth, browserHeight, randomTime, currentLevel);
             break;
             case Constants.ShipType.EMPIRE_TIE_FIGHTER:
             default:
-                ship = new GameObjects.TieFighterObject(randomX,0,browserWidth, browserHeight, randomTime);
+                ship = new GameObjects.TieFighterObject(randomX,0,browserWidth, browserHeight, randomTime, currentLevel);
             break; 
         }
         
@@ -122,11 +128,14 @@ module GameLogic {
         switch(type)
         {
             case Constants.ShipType.EMPIRE_COMMANDER:
-                ship = new GameObjects.CommanderObject(randomX,randomY,browserWidth, browserHeight, maxTime);
+                ship = new GameObjects.CommanderObject(randomX,randomY,browserWidth, browserHeight, maxTime, currentLevel);
+            break;
+            case Constants.ShipType.BOUNTY_HUNTER:
+                ship = new GameObjects.BountyHunterObject(randomX,randomY,browserWidth, browserHeight, maxTime, currentLevel);
             break;
             case Constants.ShipType.EMPIRE_DEATH_STAR:
             default:
-                ship = new GameObjects.DeathStarObject(randomX,randomY,browserWidth, browserHeight, maxTime);
+                ship = new GameObjects.DeathStarObject(randomX,randomY,browserWidth, browserHeight, maxTime, currentLevel);
             break; 
         }
         
@@ -163,13 +172,13 @@ module GameLogic {
             var damage:number = CONSTANTS.MISSILE_DAMAGE;
             var missile:GameObjects.Projectile = new GameObjects.Projectile(0,0,CONSTANTS.MISSILE_SPEED,
                 browserWidth,browserHeight,Constants.ProjectileType.MISSILE,
-                id,0,radius, color, damage);
+                id,0,radius, color, damage, currentLevel);
                 
             //add missile
             missileList.push(missile);
             
             //notify user
-            AddMissileMessage();
+            Message.AddMissileMessage();
         }
     }
     
@@ -186,7 +195,7 @@ module GameLogic {
             ship.health += 1;
             
             //notify user
-            AddHealthMessage(1);
+            Message.AddHealthMessage(1);
         }
     }
 
@@ -194,7 +203,7 @@ module GameLogic {
      * Create list populated with Projectile projects
      */
     export function getPopulatedProjectileList(type:Constants.ProjectileType, speed:number, 
-        limit:number, canvasWidth:number, canvasHeight:number) : Array<GameObjects.Projectile>
+        limit:number, canvasWidth:number, canvasHeight:number, currentLevel:number) : Array<GameObjects.Projectile>
     {
         var list:Array<GameObjects.Projectile> = new Array<GameObjects.Projectile>();
         var radius:number = 0;
@@ -218,6 +227,11 @@ module GameLogic {
                 color = CONSTANTS.IMPERIAL_ORANGE;
                 damage = CONSTANTS.IMPERIAL_MISSILE_DAMAGE;
             break;
+            case Constants.ProjectileType.TURRET_SPRAY:
+                radius = CONSTANTS.TURRET_SPRAY_RADIUS;
+                color = CONSTANTS.TURRET_GREEN;
+                damage = CONSTANTS.TURRET_SPRAY_DAMAGE;
+            break;
             default:
                 radius = CONSTANTS.CANNON_SHOT_RADIUS;
                 color = CONSTANTS.CANNON_SHOT_BLUE;
@@ -226,7 +240,8 @@ module GameLogic {
         }
         
         for (var i = 0; i < limit; i++) {
-            list.push(new GameObjects.Projectile(0,0,speed,canvasWidth,canvasHeight,type,i,0,radius, color, damage));
+            list.push(new GameObjects.Projectile(0, 0, speed, canvasWidth, canvasHeight,
+                type, i, 0, radius, color, damage, currentLevel));
         }
         
         return list;
@@ -271,10 +286,10 @@ module GameLogic {
     }
 
     /**
-     * Create new projectile object
+     * Create new projectile object. Returns number of projectiles activated.
      */
     export function fireProjectile(list:Array<GameObjects.Projectile>, offset:number, ship:GameObjects.ShipObject,
-        isTargeted:boolean, targetX:number, targetY:number)
+        isTargeted:boolean, targetX:number, targetY:number) : number
     {
         //get id of next available unused projectile
         var id: number = getUnusedProjectileId(list);
@@ -287,6 +302,12 @@ module GameLogic {
             
             //activate projectile
             activateProjectile(id, list, x, y, isTargeted, targetX, targetY);
+            
+            return 1;
+        }
+        else
+        {
+            return 0;
         }
     }
 
@@ -412,6 +433,7 @@ module GameLogic {
         var font:string = fontSize.toString() + "px 'Orbitron'";
         var colorRgb1:string;
         var colorRgb2:string = CONSTANTS.FILL_YELLOW;
+        var expireCount:number = CONSTANTS.MESSAGE_EXPIRE_COUNT;
         
         switch(type)
         {
@@ -427,6 +449,11 @@ module GameLogic {
                 colorRgb1 = CONSTANTS.FILL_ORANGE;
                 colorRgb2 = CONSTANTS.FILL_WHITE;
             break;
+            case Constants.MessageType.QUOTE:
+                colorRgb1 = CONSTANTS.FILL_YELLOW;
+                colorRgb2 = CONSTANTS.FILL_WHITE;
+                expireCount = 0; //show entire screen
+            break;
             default:
                 colorRgb1 = CONSTANTS.FILL_WHITE;
             break;
@@ -434,7 +461,23 @@ module GameLogic {
         
         //add message
         list.push(new GameObjects.Message(type, text, font, colorRgb1, colorRgb2, 
-            startX, startY));
+            startX, startY, expireCount));
+    }
+    
+    /**
+     * Get current factor of difficulty
+     */
+    export function getDifficultyFactor(level:number) : number
+    {
+        var factor:number = 0;
+        var factorLevel:number = CONSTANTS.ENEMY_STAT_INCREASE_LEVEL;
+        
+        if(level > factorLevel)
+        {
+            factor = Math.floor(factorLevel / level);
+        }
+        
+        return factor;
     }
     
     /**

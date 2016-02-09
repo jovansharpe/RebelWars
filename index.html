@@ -49,24 +49,26 @@
             <div style="width:100%;text-align:center;">
                 <h3>WELCOME TO REBEL WARS</h3>
             </div>
-            <table>
-                    <tr>
-                        <td>
-                            Username?  
-                            <label style="font-size:small;font-style:italic;">(max 30)</label>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <input type="text" id="welcomeUserName" maxlength="30"/>
-                            <input type="button" id="buttonReady" value="Ready"
-                                 onclick="javascript:UserIsReady()"/>
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                            <input type="button" id="buttonQuitWelcome" value="Exit"
-                                 onclick="javascript:UserQuitWelcome()"/>
-                        </td>
-                    </tr>
-            </table>
+            <div class="userData">
+                <table>
+                        <tr>
+                            <td>
+                                Username?  
+                                <label style="font-size:small;font-style:italic;">(max 30)</label>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="text" id="welcomeUserName" maxlength="30"/>
+                                <input type="button" id="buttonReady" value="Ready"
+                                    onclick="javascript:UserIsReady()"/>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <input type="button" id="buttonQuitWelcome" value="Exit"
+                                    onclick="javascript:UserQuitWelcome()"/>
+                            </td>
+                        </tr>
+                </table>
+            </div>
             <div id="welcomeHighScoreDiv" class="highScore">
             </div>
         </div>
@@ -81,37 +83,39 @@
             <div style="width:100%;text-align:center;">
                 <h3>LEVEL COMPLETE</h3>
             </div>
-            <table>
-                    <tr>
-                        <td>User:</td>
-                        <td><label id="lvlCompleteUserName"/></td>
-                    </tr>
-                    <tr>
-                        <td>Level:</td>
-                        <td><label id="lvlCompleteLevel"/></td>
-                    </tr>
-                    <tr>
-                        <td>Score:</td>
-                        <td><label id="lvlCompleteScore"/></td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">&nbsp;</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <input type="button" id="buttonContinue" value="Continue"
-                                 onclick="javascript:UserContinue()"/>
-                            <br/>
-                            <label class="help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hit Enter</label>
-                        </td>
-                        <td>
-                            <input type="button" id="buttonQuitLevelComplete" value="Quit"
-                                 onclick="javascript:UserQuitLevelComplete()"/>
-                            <br/>
-                            <label class="help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                        </td>
-                    </tr>
-            </table>
+            <div class="userData">
+                <table>
+                        <tr>
+                            <td>User:</td>
+                            <td><label id="lvlCompleteUserName"/></td>
+                        </tr>
+                        <tr>
+                            <td>Level:</td>
+                            <td><label id="lvlCompleteLevel"/></td>
+                        </tr>
+                        <tr>
+                            <td>Score:</td>
+                            <td><label id="lvlCompleteScore"/></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="button" id="buttonContinue" value="Continue"
+                                    onclick="javascript:UserContinue()"/>
+                                <br/>
+                                <label class="help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hit Enter</label>
+                            </td>
+                            <td>
+                                <input type="button" id="buttonQuitLevelComplete" value="Quit"
+                                    onclick="javascript:UserQuitLevelComplete()"/>
+                                <br/>
+                                <label class="help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                            </td>
+                        </tr>
+                </table>
+            </div>
             <div id="levelCompleteHighScoreDiv" class="highScore">
             </div>
         </div>
@@ -126,37 +130,39 @@
             <div style="width:100%;text-align:center;">
                 <h3>GAME OVER</h3>
             </div>
-            <table>
-                    <tr>
-                        <td>User:</td>
-                        <td><label id="gameOverUserName"/></td>
-                    </tr>
-                    <tr>
-                        <td>Level:</td>
-                        <td><label id="gameOverLevel"/></td>
-                    </tr>
-                    <tr>
-                        <td>Score:</td>
-                        <td><label id="gameOverScore"/></td>
-                    </tr>
-                    <tr>
-                        <td colspan="2">&nbsp;</td>
-                    </tr>
-                    <tr>
-                        <td>
-                            <input type="button" id="buttonPlayAgain" value="Play Again?"
-                                 onclick="javascript:UserPlayAgain()"/>
-                            <br/>
-                            <label class="help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hit Enter</label>
-                        </td>
-                        <td>
-                            <input type="button" id="buttonQuitGameOver" value="Quit"
-                                 onclick="javascript:UserQuitGameOver()"/>
-                            <br/>
-                            <label class="help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
-                        </td>
-                    </tr>
-            </table>
+            <div class="userData">
+                <table>
+                        <tr>
+                            <td>User:</td>
+                            <td><label id="gameOverUserName"/></td>
+                        </tr>
+                        <tr>
+                            <td>Level:</td>
+                            <td><label id="gameOverLevel"/></td>
+                        </tr>
+                        <tr>
+                            <td>Score:</td>
+                            <td><label id="gameOverScore"/></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="button" id="buttonPlayAgain" value="Play Again?"
+                                    onclick="javascript:UserPlayAgain()"/>
+                                <br/>
+                                <label class="help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hit Enter</label>
+                            </td>
+                            <td>
+                                <input type="button" id="buttonQuitGameOver" value="Quit"
+                                    onclick="javascript:UserQuitGameOver()"/>
+                                <br/>
+                                <label class="help">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                            </td>
+                        </tr>
+                </table>
+            </div>
             <div id="gameOverHighScoreDiv" class="highScore">
             </div>
         </div>

@@ -29,9 +29,16 @@ gameCanvas.width = browserWidth;
 gameCanvas.height = browserHeight;
 //add canvas to page
 document.body.appendChild(gameCanvas);
+/*** INITIALIZE GAME MGMT VARS ***/
+var intervalHolder = null;
+var atStartScreen = true;
+var isGameReady = false;
+var currentLevel = CONSTANTS.DEFAULT_START_LEVEL;
+var timePrevious = Date.now();
+var titleTimePrevious = 0;
 /*** INITIALIZE GAME OBJECTS ***/
 //user controlled ship
-var rebelShip = new GameObjects.RebelShipObject(browserWidth, browserHeight);
+var rebelShip = new GameObjects.RebelShipObject(browserWidth, browserHeight, currentLevel);
 //list of explosion sprites
 var explosionList = new Array();
 //list to store message to user
@@ -40,22 +47,15 @@ var messageList = new Array();
 var enemyShipList = new Array();
 var bossList = new Array();
 //list of cannon shots
-var cannonShotList = GameLogic.getPopulatedProjectileList(Constants.ProjectileType.CANNON_SHOT, CONSTANTS.CANNON_SHOT_SPEED, CONSTANTS.CANNON_SHOT_LIMIT, gameCanvas.width, gameCanvas.height);
+var cannonShotList = GameLogic.getPopulatedProjectileList(Constants.ProjectileType.CANNON_SHOT, CONSTANTS.CANNON_SHOT_SPEED, CONSTANTS.CANNON_SHOT_LIMIT, gameCanvas.width, gameCanvas.height, currentLevel);
 //list of missiles
-var missileList = GameLogic.getPopulatedProjectileList(Constants.ProjectileType.MISSILE, CONSTANTS.MISSILE_SPEED, CONSTANTS.MISSILE_LIMIT, gameCanvas.width, gameCanvas.height);
+var missileList = GameLogic.getPopulatedProjectileList(Constants.ProjectileType.MISSILE, CONSTANTS.MISSILE_SPEED, CONSTANTS.MISSILE_LIMIT, gameCanvas.width, gameCanvas.height, currentLevel);
 //manage user input controls
 var rightArrowKeyed = false;
 var leftArrowKeyed = false;
 //bind keyboard event handlers
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
-//init game mgmt vars
-var intervalHolder = null;
-var atStartScreen = true;
-var isGameReady = false;
-var currentLevel = CONSTANTS.DEFAULT_START_LEVEL;
-var timePrevious = Date.now();
-var titleTimePrevious = 0;
 //init user stats
 var currentUserScore = new GameObjects.Score("Anonymous", CONSTANTS.DEFAULT_START_LEVEL);
 //var highScoreList:Array<GameObjects.HighScore> = new Array<GameObjects.HighScore>();
@@ -63,6 +63,8 @@ var champion = Service.getChampion();
 //init theme song
 var titleThemeSong = new Audio("sounds/MainThemeWhistle.mp3");
 titleThemeSong.loop = true;
+//init instruction panel
+var instructionPanel = new GameObjects.ImageObject(0, 0, browserWidth, browserHeight);
 //check browser
 if (GameLogic.isCompliantBrowser()) {
     //check if start screen showing
@@ -107,23 +109,23 @@ function continueGame() {
  * Reset game state and advance to next level
  */
 function startOver() {
-    //reset ship
-    rebelShip = new GameObjects.RebelShipObject(browserWidth, browserHeight);
-    //game active
-    isGameReady = true;
     //increment new level
     currentLevel = CONSTANTS.DEFAULT_START_LEVEL;
+    //reset ship
+    rebelShip = new GameObjects.RebelShipObject(browserWidth, browserHeight, currentLevel);
+    //game active
+    isGameReady = true;
     //reset objects
     resetObjects();
     //reset score
     currentUserScore.levelStart = currentLevel;
     currentUserScore.currentScore = 0;
     //reset missile limit
-    missileList = GameLogic.getPopulatedProjectileList(Constants.ProjectileType.MISSILE, CONSTANTS.MISSILE_SPEED, CONSTANTS.MISSILE_LIMIT, gameCanvas.width, gameCanvas.height);
+    missileList = GameLogic.getPopulatedProjectileList(Constants.ProjectileType.MISSILE, CONSTANTS.MISSILE_SPEED, CONSTANTS.MISSILE_LIMIT, gameCanvas.width, gameCanvas.height, currentLevel);
     //create enemies for this level
     loadEnemies();
     //notify user
-    AddGameStartMessage();
+    Message.AddGameStartMessage();
     //reset time var
     timePrevious = Date.now();
 }
@@ -154,42 +156,6 @@ function resetObjects() {
     leftArrowKeyed = false;
     //reset messages
     messageList.splice(0);
-}
-function GetMessageLocationX() {
-    return (browserWidth / 2);
-}
-function GetMessageLocationY() {
-    return (browserHeight - (rebelShip.objImage.naturalHeight * 2));
-}
-function AddGameStartMessage() {
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "*** START GAME ***", GetMessageLocationX(), GetMessageLocationY(), 32);
-}
-function AddHealthMessage(amount) {
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.ADD_HEALTH, "+" + amount.toString() + " Health", GetMessageLocationX(), GetMessageLocationY(), 24);
-}
-function AddMissileMessage() {
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.ADD_MISSILE, "+1 Missile", GetMessageLocationX(), GetMessageLocationY(), 24);
-}
-function AddBossMessage() {
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.NEW_BOSS, "^^^ BOSS DETECTED ^^^", GetMessageLocationX(), GetMessageLocationY(), 32);
-}
-function AddPersonalRecordMessage() {
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "*** PERSONAL RECORD ***", GetMessageLocationX(), GetMessageLocationY(), 32);
-}
-function AddPressSpacebarMessage() {
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "*** PRESS SPACEBAR TO START ***", GetMessageLocationX(), GetMessageLocationY(), 32);
-}
-function AddNewHighScoreMessage() {
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.HIGH_SCORE, "!!! NEW HIGH SCORE !!!", GetMessageLocationX(), GetMessageLocationY(), 40);
-    //add message
-    GameLogic.addNewMessage(messageList, Constants.MessageType.HIGH_SCORE, "### JEDI GRAND MASTER ###", GetMessageLocationX(), GetMessageLocationY(), 40);
 }
 /**
  * Get amount of enemy ships remaining
@@ -239,7 +205,7 @@ function keyHandler(isDown, event) {
             {
                 //check if key up
                 if (!isDown) {
-                    GameLogic.fireProjectile(cannonShotList, CONSTANTS.CANNON_SHOT_OFFSET_Y, rebelShip, false, 0, 0); //add new shot
+                    currentUserScore.shotsFired += GameLogic.fireProjectile(cannonShotList, CONSTANTS.CANNON_SHOT_OFFSET_Y, rebelShip, false, 0, 0); //add new shot
                 }
                 break;
             }
@@ -247,7 +213,7 @@ function keyHandler(isDown, event) {
             {
                 //check if key up
                 if (!isDown) {
-                    GameLogic.fireProjectile(missileList, CONSTANTS.MISSILE_OFFSET_Y, rebelShip, false, 0, 0); //add new missile
+                    currentUserScore.shotsFired += GameLogic.fireProjectile(missileList, CONSTANTS.MISSILE_OFFSET_Y, rebelShip, false, 0, 0); //add new missile
                 }
                 break;
             }
@@ -290,7 +256,7 @@ function startGame() {
     //create enemies for this level
     loadEnemies();
     //notify user
-    AddGameStartMessage();
+    Message.AddGameStartMessage();
     //init game state vars
     timePrevious = Date.now();
     //start main loop
@@ -374,7 +340,7 @@ function showStartScreen() {
     Render.moveEnemyShips(titleDelta, titleTimeNow, enemyShipList);
     //check if no messages
     if (messageList.length == 0) {
-        AddPressSpacebarMessage(); //add new
+        Message.AddPressSpacebarMessage(); //add new
     }
     //check if no enemies left
     if (enemyShipList.length == 0) {
@@ -382,6 +348,8 @@ function showStartScreen() {
     }
     //render title
     Render.drawTitle(canvasContext);
+    //render title
+    Render.drawInstructionPanel(canvasContext, instructionPanel);
     //render high score
     Render.drawChampion(canvasContext, champion);
     //render any messages

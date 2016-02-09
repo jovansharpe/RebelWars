@@ -4,7 +4,8 @@ body {
 
 html {
     height: 100%;
-    background: url('../images/background.png') repeat;
+    background: url('../images/background.png');
+    background-size: cover;
 }
 
 img.centered {
@@ -12,25 +13,26 @@ img.centered {
     margin-left: auto;
     margin-right: auto; }
 
-#welcomeHighScoreDiv {
+#welcomeHighScoreDiv, 
+#levelCompleteHighScoreDiv, 
+#gameOverHighScoreDiv {
     margin-top: 10px;
 }
 
-#welcomeHighScoreDiv table{
+#welcomeHighScoreDiv table,
+#levelCompleteHighScoreDiv table,
+#gameOverHighScoreDiv table {
     width: 100%;
     margin: auto;
 }
 
-#welcomeHighScoreDiv table tr td{
-	text-align:center;
+.userData {
+    width:100%;
+    height:100%;
 }
 
-.show {
-    display: block;
-}
-
-.noshow {
-    display: none;
+.userData table {
+    margin: 0 auto;
 }
 
 .help {
@@ -42,11 +44,22 @@ img.centered {
 
 .highScore {
     width: 100%;
+    margin: auto;
 }
 
-.highScoreHeaderRank .highScoreHeaderName {
+.highScoreTableHeaderRow, .highScoreHeaderRow {
+    line-height: 24px;
+}
+
+.highScoreHeaderRank, .highScoreHeaderName {
     text-align: left;
     font-weight: bold;
+}
+
+.highScoreTableHeader {
+    text-align: center;
+    font-weight: bold;
+    font-size: 18px;
 }
 
 .highScoreHeaderScore {
@@ -54,12 +67,14 @@ img.centered {
     font-weight: bold;
 }
 
-.highScoreDataRank .highScoreDataName {
+.highScoreDataRank, .highScoreDataName {
     text-align: left;
+    font-size: 14px;
 }
 
 .highScoreDataScore {
     text-align: center;
+    font-size: 14px;
 }
 
 /*********** MODAL WINDOWS STYLING ********************/
