@@ -137,6 +137,8 @@ function loadEnemies() {
     enemyShipList = GameLogic.buildEnemyListByLevel(currentLevel, browserWidth, browserHeight);
     //create bosses
     bossList = GameLogic.getBossListByLevel(currentLevel, browserWidth, browserHeight);
+    //alert user if difficulty has increased
+    GameLogic.notifyDifficulty(currentLevel);
 }
 function loadDummyEnemies() {
     //create enemies

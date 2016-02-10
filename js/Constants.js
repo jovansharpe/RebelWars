@@ -62,7 +62,7 @@ var Constants;
             this.BOUNTY_HUNTER_LEVEL_FACTOR = 7;
             this.ADD_MISSILE_LEVEL = 3;
             this.ADD_HEALTH_LEVEL = 5;
-            this.ENEMY_STAT_INCREASE_LEVEL = 10;
+            this.ENEMY_STAT_INCREASE_LEVEL = 8;
             //speeds
             this.BASE_SPEED = 256;
             this.REBEL_SHIP_SPEED = this.BASE_SPEED;

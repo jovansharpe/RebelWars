@@ -62,7 +62,7 @@ var Constants;
             this.BOUNTY_HUNTER_LEVEL_FACTOR = 7;
             this.ADD_MISSILE_LEVEL = 3;
             this.ADD_HEALTH_LEVEL = 5;
-            this.ENEMY_STAT_INCREASE_LEVEL = 10;
+            this.ENEMY_STAT_INCREASE_LEVEL = 8;
             //speeds
             this.BASE_SPEED = 256;
             this.REBEL_SHIP_SPEED = this.BASE_SPEED;
@@ -1399,6 +1399,15 @@ var GameObjects;
 /**SPACING**/var GameLogic;
 (function (GameLogic) {
     var CONSTANTS = new Constants.Constants();
+    function notifyDifficulty(currentLevel) {
+        //check for increase
+        if (currentLevel % CONSTANTS.ENEMY_STAT_INCREASE_LEVEL == 0) {
+            Message.AddDifficultyIncreaseMessage();
+            Message.AddQuoteMessage("Enemy Speed & Health Amounts Have Been Increased!");
+            Message.AddQuoteMessage("May the Force Be With You!");
+        }
+    }
+    GameLogic.notifyDifficulty = notifyDifficulty;
     /**
      * Create list of enemy ship objects based on level
      */
@@ -1770,8 +1779,8 @@ var GameObjects;
     function getDifficultyFactor(level) {
         var factor = 0;
         var factorLevel = CONSTANTS.ENEMY_STAT_INCREASE_LEVEL;
-        if (level > factorLevel) {
-            factor = Math.floor(factorLevel / level);
+        if (level >= factorLevel) {
+            factor = Math.floor(level / factorLevel);
         }
         return factor;
     }
@@ -2627,6 +2636,12 @@ var GameObjects;
         //add message
         GameLogic.addNewMessage(messageList, Constants.MessageType.QUOTE, text, GetQuoteLocationX(), GetQuoteLocationY(), 24);
     }
+    Message.AddQuoteMessage = AddQuoteMessage;
+    function AddDifficultyIncreaseMessage() {
+        //add message
+        GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "!!! DIFFICULTY INCREASED !!!", GetMessageLocationX(), GetMessageLocationY(), 32);
+    }
+    Message.AddDifficultyIncreaseMessage = AddDifficultyIncreaseMessage;
     function AddGameStartMessage() {
         //add message
         GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "*** START GAME ***", GetMessageLocationX(), GetMessageLocationY(), 32);
@@ -2806,6 +2821,8 @@ function loadEnemies() {
     enemyShipList = GameLogic.buildEnemyListByLevel(currentLevel, browserWidth, browserHeight);
     //create bosses
     bossList = GameLogic.getBossListByLevel(currentLevel, browserWidth, browserHeight);
+    //alert user if difficulty has increased
+    GameLogic.notifyDifficulty(currentLevel);
 }
 function loadDummyEnemies() {
     //create enemies

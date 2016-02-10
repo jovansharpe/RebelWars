@@ -198,6 +198,9 @@ function loadEnemies()
     
     //create bosses
     bossList = GameLogic.getBossListByLevel(currentLevel, browserWidth, browserHeight);
+    
+    //alert user if difficulty has increased
+    GameLogic.notifyDifficulty(currentLevel);
 }
 
 function loadDummyEnemies()

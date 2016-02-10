@@ -60,7 +60,7 @@ module Constants {
         BOUNTY_HUNTER_LEVEL_FACTOR = 7;
         ADD_MISSILE_LEVEL = 3;
         ADD_HEALTH_LEVEL = 5;
-        ENEMY_STAT_INCREASE_LEVEL = 10;
+        ENEMY_STAT_INCREASE_LEVEL = 8;
         //speeds
         BASE_SPEED:number = 256;
         REBEL_SHIP_SPEED:number = this.BASE_SPEED;

@@ -2,6 +2,19 @@ module GameLogic {
 
     var CONSTANTS:Constants.Constants = new Constants.Constants();
 
+    export function notifyDifficulty(currentLevel:number)
+    {
+        //check for increase
+        if( currentLevel % CONSTANTS.ENEMY_STAT_INCREASE_LEVEL == 0 )
+        {
+            Message.AddDifficultyIncreaseMessage();
+            
+            Message.AddQuoteMessage("Enemy Speed & Health Amounts Have Been Increased!");
+            
+            Message.AddQuoteMessage("May the Force Be With You!");
+        }
+    }
+
     /**
      * Create list of enemy ship objects based on level
      */
@@ -472,9 +485,9 @@ module GameLogic {
         var factor:number = 0;
         var factorLevel:number = CONSTANTS.ENEMY_STAT_INCREASE_LEVEL;
         
-        if(level > factorLevel)
+        if(level >= factorLevel)
         {
-            factor = Math.floor(factorLevel / level);
+            factor = Math.floor(level/factorLevel);
         }
         
         return factor;

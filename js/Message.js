@@ -47,6 +47,12 @@ var Message;
         //add message
         GameLogic.addNewMessage(messageList, Constants.MessageType.QUOTE, text, GetQuoteLocationX(), GetQuoteLocationY(), 24);
     }
+    Message.AddQuoteMessage = AddQuoteMessage;
+    function AddDifficultyIncreaseMessage() {
+        //add message
+        GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "!!! DIFFICULTY INCREASED !!!", GetMessageLocationX(), GetMessageLocationY(), 32);
+    }
+    Message.AddDifficultyIncreaseMessage = AddDifficultyIncreaseMessage;
     function AddGameStartMessage() {
         //add message
         GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "*** START GAME ***", GetMessageLocationX(), GetMessageLocationY(), 32);

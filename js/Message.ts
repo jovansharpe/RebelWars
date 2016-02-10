@@ -57,11 +57,18 @@ module Message {
         }
     }
     
-    function AddQuoteMessage(text:string): void
+    export function AddQuoteMessage(text:string): void
     {
         //add message
         GameLogic.addNewMessage(messageList, Constants.MessageType.QUOTE, text, 
             GetQuoteLocationX(), GetQuoteLocationY(), 24);
+    }
+
+    export function AddDifficultyIncreaseMessage() : void
+    {
+        //add message
+        GameLogic.addNewMessage(messageList, Constants.MessageType.GENERIC, "!!! DIFFICULTY INCREASED !!!", 
+            GetMessageLocationX(), GetMessageLocationY(), 32);
     }
 
     export function AddGameStartMessage() : void

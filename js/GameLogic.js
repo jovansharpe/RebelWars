@@ -1,6 +1,15 @@
 var GameLogic;
 (function (GameLogic) {
     var CONSTANTS = new Constants.Constants();
+    function notifyDifficulty(currentLevel) {
+        //check for increase
+        if (currentLevel % CONSTANTS.ENEMY_STAT_INCREASE_LEVEL == 0) {
+            Message.AddDifficultyIncreaseMessage();
+            Message.AddQuoteMessage("Enemy Speed & Health Amounts Have Been Increased!");
+            Message.AddQuoteMessage("May the Force Be With You!");
+        }
+    }
+    GameLogic.notifyDifficulty = notifyDifficulty;
     /**
      * Create list of enemy ship objects based on level
      */
@@ -372,8 +381,8 @@ var GameLogic;
     function getDifficultyFactor(level) {
         var factor = 0;
         var factorLevel = CONSTANTS.ENEMY_STAT_INCREASE_LEVEL;
-        if (level > factorLevel) {
-            factor = Math.floor(factorLevel / level);
+        if (level >= factorLevel) {
+            factor = Math.floor(level / factorLevel);
         }
         return factor;
     }
