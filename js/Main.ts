@@ -24,8 +24,11 @@ GOOGLE - L spiro game loop
 var CONSTANTS = new Constants.Constants();
 
 //Get container dimensions
-var browserWidth:number = (window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth) - CONSTANTS.CLIENT_WINDOW_MARGIN;
-var browserHeight:number = (window.innerHeight || document.documentElement.clientHeight  || document.body.clientHeight) - CONSTANTS.CLIENT_WINDOW_MARGIN;
+// var browserWidth:number = (window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth) - CONSTANTS.CLIENT_WINDOW_MARGIN;
+// var browserHeight:number = (window.innerHeight || document.documentElement.clientHeight  || document.body.clientHeight) - CONSTANTS.CLIENT_WINDOW_MARGIN;
+var browserWidth:number = 1280;
+var browserHeight:number = 590;
+
 
 //create canvas
 var gameCanvas:HTMLCanvasElement = <HTMLCanvasElement>document.createElement("canvas");
